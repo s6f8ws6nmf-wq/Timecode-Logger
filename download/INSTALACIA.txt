@@ -27,9 +27,13 @@ OVLÁDANIE
 - RÝCHLE TLAČIDLÁ (PTZ, CAM A, CAM B, CAM C, CAM D, IBA ZVUK): klik alebo klávesy 1–9
   zapíše TC so štítkom. "Upraviť tlačidlá" = premenovanie, pridanie, odstránenie
   ("Predvolené" obnoví pôvodné). Štítok v tabuľke sa dá prepísať.
-- AVID MARKERY (Shift+Cmd+E alebo tlačidlo "Avid markery"): v Media Composeri otvorte
-  sekvenciu, Tools > Markers, pravý klik > Import Markers a vyberte exportovaný .txt.
+- EXPORT MARKEROV (modré tlačidlo "Export markerov" alebo menu Súbor > Exportovať markery):
+  * Avid Media Composer (.txt, Shift+Cmd+E): v okne Markers pravý klik > Import Markers.
+  * Adobe Premiere Pro (.xml, Shift+Cmd+P): File > Import > vyberte .xml – vytvorí sa
+    sekvencia "… - markery" s markermi na správnych timecodoch (začína na celej hodine).
+  * DaVinci Resolve (.edl, Shift+Cmd+R): v Media Pool pravý klik na timeline >
+    Timelines > Import > Timeline Markers from EDL.
   Farba markera podľa tlačidla (1. červená, 2. zelená, 3. modrá, 4. cyan, 5. magenta,
-  6. žltá…), komentár = štítok - poznámka. Stopa V1.
-- Uložiť (Cmd+S) uloží projekt (.tclog) a ponúkne export poznámok do .txt alebo Avid markerov.
+  6. žltá…), text = štítok - poznámka.
+- Uložiť (Cmd+S) uloží projekt (.tclog) a ponúkne export poznámok (.txt) alebo markerov pre Avid, Premiere Pro a DaVinci Resolve.
   Export TXT kedykoľvek: Cmd+E. Otvoriť projekt: Cmd+O.

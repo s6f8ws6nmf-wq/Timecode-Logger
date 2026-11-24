@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('api', {
   openProject: () => ipcRenderer.invoke('open-project'),
   askExport: () => ipcRenderer.invoke('ask-export'),
   exportTxt: (args) => ipcRenderer.invoke('export-txt', args),
+  markerMenu: (pos) => ipcRenderer.invoke('marker-menu', pos),
   confirm: (args) => ipcRenderer.invoke('confirm', args),
   onMenu: (cb) => ipcRenderer.on('menu', (_e, cmd) => cb(cmd))
 });

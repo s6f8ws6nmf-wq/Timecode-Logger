@@ -21,7 +21,14 @@ function buildMenu() {
         { label: 'Uložiť projekt ako…', accelerator: 'CmdOrCtrl+Shift+S', click: () => send('saveAs') },
         { type: 'separator' },
         { label: 'Exportovať poznámky (TXT)…', accelerator: 'CmdOrCtrl+E', click: () => send('export') },
-        { label: 'Exportovať Avid markery…', accelerator: 'CmdOrCtrl+Shift+E', click: () => send('exportAvid') },
+        {
+          label: 'Exportovať markery',
+          submenu: [
+            { label: 'Avid Media Composer (.txt)…', accelerator: 'CmdOrCtrl+Shift+E', click: () => send('exportAvid') },
+            { label: 'Adobe Premiere Pro (.xml)…', accelerator: 'CmdOrCtrl+Shift+P', click: () => send('exportPremiere') },
+            { label: 'DaVinci Resolve (.edl)…', accelerator: 'CmdOrCtrl+Shift+R', click: () => send('exportResolve') }
+          ]
+        },
         ...(isMac ? [] : [{ type: 'separator' }, { role: 'quit', label: 'Koniec' }])
       ]
     },
@@ -114,19 +121,31 @@ ipcMain.handle('open-project', async () => {
 ipcMain.handle('ask-export', async () => {
   const r = await dialog.showMessageBox(win, {
     type: 'info',
-    buttons: ['Exportovať TXT', 'Avid markery', 'Nie'],
-    defaultId: 0, cancelId: 2,
+    buttons: ['Poznámky (TXT)', 'Avid Media Composer', 'Adobe Premiere Pro', 'DaVinci Resolve', 'Neexportovať'],
+    defaultId: 0, cancelId: 4,
     message: 'Projekt bol uložený.',
-    detail: 'Chcete vyexportovať poznámky do textového súboru (.txt) alebo ako Avid markery?'
+    detail: 'Chcete vyexportovať poznámky (.txt) alebo markery pre strižňu?'
   });
-  return ['txt', 'avid', null][r.response];
+  return ['txt', 'avid', 'premiere', 'resolve', null][r.response];
 });
 
-ipcMain.handle('export-txt', async (_e, { text, suggestedName, title }) => {
+// native drop-down menu under the "Export markerov" button
+ipcMain.handle('marker-menu', (_e, { x, y }) => new Promise((resolve) => {
+  let picked = null;
+  const m = Menu.buildFromTemplate([
+    { label: 'Avid Media Composer (.txt)', click: () => { picked = 'avid'; } },
+    { label: 'Adobe Premiere Pro (.xml)', click: () => { picked = 'premiere'; } },
+    { label: 'DaVinci Resolve (.edl)', click: () => { picked = 'resolve'; } }
+  ]);
+  m.popup({ window: win, x: Math.round(x), y: Math.round(y), callback: () => setTimeout(() => resolve(picked), 0) });
+}));
+
+ipcMain.handle('export-txt', async (_e, { text, suggestedName, title, ext, filterName }) => {
+  ext = ext || 'txt';
   const r = await dialog.showSaveDialog(win, {
     title: title || 'Exportovať poznámky',
-    defaultPath: (suggestedName || 'Poznamky') + '.txt',
-    filters: [{ name: 'Textový súbor', extensions: ['txt'] }]
+    defaultPath: (suggestedName || 'Poznamky') + '.' + ext,
+    filters: [{ name: filterName || 'Textový súbor', extensions: [ext] }]
   });
   if (r.canceled || !r.filePath) return { ok: false };
   fs.writeFileSync(r.filePath, text, 'utf8');

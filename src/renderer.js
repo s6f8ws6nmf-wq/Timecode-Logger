@@ -254,6 +254,8 @@ async function save(saveAs = false, askExport = true) {
     const choice = await window.api.askExport();
     if (choice === 'txt') await exportTxt();
     if (choice === 'avid') await exportAvid();
+    if (choice === 'premiere') await exportPremiere();
+    if (choice === 'resolve') await exportResolve();
   }
   return true;
 }
@@ -282,6 +284,96 @@ async function exportAvid() {
   const r = await window.api.exportTxt({ text: buildAvid(), suggestedName: safeFileName(projectName()) + ' - Avid markers', title: 'Exportovať Avid markery' });
   if (r.ok) status('Avid markery exportované: ' + r.filePath);
 }
+
+// ---------- Adobe Premiere Pro: FCP7 XML (xmeml) sequence with sequence markers ----------
+const xmlEsc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const oneLine = (s) => String(s || '').replace(/[\t\r\n]+/g, ' ').trim();
+function sortedEntries() {
+  return entries.map((e) => ({ ...e, f: parseTc(e.tc) ?? 0 })).sort((a, b) => a.f - b.f);
+}
+function buildPremiere() {
+  const list = sortedEntries();
+  const hourF = 3600 * FPS;
+  const start = Math.floor(list[0].f / hourF) * hourF;          // sequence starts on the full hour (e.g. 10:00:00:00)
+  const dur = list[list.length - 1].f - start + 60 * FPS;       // + 1 min tail
+  const rate = '<rate><timebase>25</timebase><ntsc>FALSE</ntsc></rate>';
+  const markers = list.map((e) => {
+    const name = oneLine(e.label) || oneLine(e.note) || e.tc;
+    const comment = oneLine(e.label) ? oneLine(e.note) : '';
+    return `    <marker>
+      <name>${xmlEsc(name)}</name>
+      <comment>${xmlEsc(comment)}</comment>
+      <in>${e.f - start}</in>
+      <out>-1</out>
+    </marker>`;
+  }).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xmeml>
+<xmeml version="4">
+  <sequence id="sequence-1">
+    <name>${xmlEsc(projectName())} - markery</name>
+    <duration>${dur}</duration>
+    ${rate}
+    <timecode>
+      ${rate}
+      <string>${framesToTc(start)}</string>
+      <frame>${start}</frame>
+      <displayformat>NDF</displayformat>
+    </timecode>
+    <in>-1</in>
+    <out>-1</out>
+    <media>
+      <video>
+        <format>
+          <samplecharacteristics>
+            ${rate}
+            <width>1920</width>
+            <height>1080</height>
+            <anamorphic>FALSE</anamorphic>
+            <pixelaspectratio>square</pixelaspectratio>
+            <fielddominance>none</fielddominance>
+          </samplecharacteristics>
+        </format>
+        <track></track>
+      </video>
+      <audio>
+        <track></track>
+      </audio>
+    </media>
+${markers}
+  </sequence>
+</xmeml>
+`;
+}
+
+// ---------- DaVinci Resolve: timeline markers EDL ----------
+const RESOLVE_COLORS = { red: 'Red', green: 'Green', blue: 'Blue', cyan: 'Cyan', magenta: 'Fuchsia', yellow: 'Yellow', white: 'Cream', black: 'Cocoa' };
+function buildResolve() {
+  const lines = [`TITLE: ${oneLine(projectName())}`, 'FCM: NON-DROP FRAME', ''];
+  sortedEntries().forEach((e, i) => {
+    const n = String(i + 1).padStart(3, '0');
+    const tin = framesToTc(e.f), tout = framesToTc(e.f + 1);
+    const name = ([oneLine(e.label), oneLine(e.note)].filter(Boolean).join(' - ') || e.tc).replace(/\|/g, '/');
+    lines.push(`${n}  001      V     C        ${tin} ${tout} ${tin} ${tout}  `);
+    lines.push(` |C:ResolveColor${RESOLVE_COLORS[avidColor(e.label)]} |M:${name} |D:1`);
+    lines.push('');
+  });
+  return lines.join('\n');
+}
+
+async function exportMarkers(kind) {
+  document.activeElement && document.activeElement.blur();
+  if (!entries.length) { status('Žiadne záznamy na export.'); return; }
+  const base = safeFileName(projectName());
+  const cfg = {
+    premiere: { text: buildPremiere, ext: 'xml', filterName: 'Premiere Pro XML', suffix: 'Premiere markers', title: 'Exportovať markery pre Premiere Pro', label: 'Premiere Pro' },
+    resolve: { text: buildResolve, ext: 'edl', filterName: 'EDL', suffix: 'Resolve markers', title: 'Exportovať markery pre DaVinci Resolve', label: 'DaVinci Resolve' }
+  }[kind];
+  const r = await window.api.exportTxt({ text: cfg.text(), suggestedName: `${base} - ${cfg.suffix}`, title: cfg.title, ext: cfg.ext, filterName: cfg.filterName });
+  if (r.ok) status(`Markery pre ${cfg.label} exportované: ${r.filePath}`);
+}
+const exportPremiere = () => exportMarkers('premiere');
+const exportResolve = () => exportMarkers('resolve');
 
 async function confirmDiscard() {
   if (!dirty) return true;
@@ -375,7 +467,13 @@ $('btnNew').addEventListener('click', newProject);
 $('btnOpen').addEventListener('click', openProject);
 $('btnSave').addEventListener('click', () => save(false));
 $('btnExport').addEventListener('click', exportTxt);
-$('btnAvid').addEventListener('click', exportAvid);
+$('btnMarkers').addEventListener('click', async () => {
+  const r = $('btnMarkers').getBoundingClientRect();
+  const choice = await window.api.markerMenu({ x: r.left, y: r.bottom + 4 });
+  if (choice === 'avid') exportAvid();
+  if (choice === 'premiere') exportPremiere();
+  if (choice === 'resolve') exportResolve();
+});
 $('btnSetTc').addEventListener('click', openSetTc);
 $('btnTod').addEventListener('click', () => { offsetMs = 0; saveOffset(); status('Synchronizované na systémový čas dňa.'); });
 $('btnZero').addEventListener('click', () => { setTcNow(0); status('Timecode beží od 00:00:00:00.'); });
@@ -396,7 +494,7 @@ window.api.onMenu((cmd) => {
   if (modalOpen() && cmd !== 'setTc') return;
   ({
     new: newProject, open: openProject, save: () => save(false), saveAs: () => save(true),
-    export: exportTxt, exportAvid, log: () => logTc(), setTc: openSetTc,
+    export: exportTxt, exportAvid, exportPremiere, exportResolve, log: () => logTc(), setTc: openSetTc,
     tod: () => { offsetMs = 0; saveOffset(); status('Synchronizované na systémový čas dňa.'); }
   }[cmd] || (() => {}))();
 });

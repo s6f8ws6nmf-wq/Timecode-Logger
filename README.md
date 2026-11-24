@@ -7,7 +7,7 @@ Aplikácia pre macOS (Big Sur 11 a novší) na skriptovanie televízneho vysiela
 - Ručná úprava timecodu v tabuľke a ručná synchronizácia (Nastaviť TC, ±1 fr/s/min/h)
 - Rýchle tlačidlá so štítkami (PTZ, CAM A–D, IBA ZVUK) – editovateľné, klávesy 1–9
 - Uloženie projektu (.tclog) s ponukou exportu poznámok do TXT
-- Export markerov pre Avid Media Composer (Import Markers)
+- Export markerov pre Avid Media Composer (.txt), Adobe Premiere Pro (.xml) a DaVinci Resolve (.edl)
 
 ## Stiahnutie
 
