@@ -1,0 +1,29 @@
+# Timecode Logger
+
+Aplikácia pre macOS (Big Sur 11 a novší) na skriptovanie televízneho vysielania.
+
+- Freerun timecode PAL 25 fps (predvolene podľa času dňa), stále viditeľný
+- Zápis aktuálneho TC do tabuľky (tlačidlo, medzerník, ⌘↩ alebo klik do tabuľky) + poznámka
+- Ručná úprava timecodu v tabuľke a ručná synchronizácia (Nastaviť TC, ±1 fr/s/min/h)
+- Uloženie projektu (.tclog) s ponukou exportu poznámok do TXT
+
+## Stiahnutie
+
+Hotové DMG nájdete v sekcii **[Releases](../../releases/latest)**:
+
+- `Timecode-Logger-AppleSilicon.dmg` – Macy s čipom M1/M2/…
+- `Timecode-Logger-Intel.dmg` – Macy s procesorom Intel
+
+Prvé spustenie: pravý klik na aplikáciu → Otvoriť. Ak macOS hlási, že je „poškodená“:
+
+```bash
+xattr -cr "/Applications/Timecode Logger.app"
+```
+
+## Vývoj
+
+```bash
+npm install
+npm start          # spustenie
+npm run pack:mac   # balíčky pre macOS (x64 + arm64) do dist/
+```

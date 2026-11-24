@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<title>Timecode Logger</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="project">
+    <input id="projectName" class="project-name" value="Nový projekt" spellcheck="false" title="Názov projektu">
+    <span id="dirtyMark" class="dirty" title="Neuložené zmeny">●</span>
+  </div>
+  <div class="toolbar">
+    <button id="btnNew" title="Nový projekt (⌘N)">Nový</button>
+    <button id="btnOpen" title="Otvoriť (⌘O)">Otvoriť</button>
+    <button id="btnSave" title="Uložiť (⌘S)">Uložiť</button>
+    <button id="btnExport" title="Exportovať TXT (⌘E)">Export TXT</button>
+  </div>
+</header>
+
+<section class="tc-panel">
+  <div class="tc-wrap">
+    <div class="tc-label">FREERUN · PAL 25 fps · <span id="syncMode">čas dňa</span></div>
+    <div id="tc" class="tc">00:00:00:00</div>
+    <div class="nudge">
+      <button data-nudge="-3600">−1 h</button>
+      <button data-nudge="-60">−1 min</button>
+      <button data-nudge="-1">−1 s</button>
+      <button data-nudge-f="-1">−1 fr</button>
+      <button data-nudge-f="1">+1 fr</button>
+      <button data-nudge="1">+1 s</button>
+      <button data-nudge="60">+1 min</button>
+      <button data-nudge="3600">+1 h</button>
+    </div>
+  </div>
+  <div class="tc-side">
+    <button id="btnLog" class="log-btn" title="Medzerník alebo ⌘Enter">ZAPÍSAŤ TC<small>medzerník / ⌘↩</small></button>
+    <div class="sync">
+      <button id="btnSetTc" title="⌘T">Nastaviť TC</button>
+      <button id="btnTod" title="Vrátiť na systémový čas">Čas dňa</button>
+      <button id="btnZero" title="Spustiť od 00:00:00:00">Od nuly</button>
+    </div>
+  </div>
+</section>
+
+<section class="table-wrap" id="tableWrap">
+  <table class="log">
+    <thead>
+      <tr><th class="c-n">#</th><th class="c-tc">Timecode</th><th class="c-note">Poznámka</th><th class="c-act"></th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div id="empty" class="empty">Kliknite sem, stlačte <b>medzerník</b> alebo tlačidlo <b>ZAPÍSAŤ TC</b> –<br>zapíše sa aktuálny timecode a môžete písať poznámku.</div>
+  <div id="addZone" class="add-zone" title="Kliknutím zapíšete aktuálny timecode">+ kliknite pre zápis timecode</div>
+</section>
+
+<footer class="status"><span id="status">Pripravené</span><span id="count"></span></footer>
+
+<div id="modal" class="modal hidden">
+  <div class="modal-box">
+    <h3>Nastaviť timecode</h3>
+    <p>Zadajte timecode, ktorý má byť <b>práve teraz</b>. Po potvrdení bude ďalej bežať (freerun).</p>
+    <input id="setTcInput" class="tc-input" placeholder="HH:MM:SS:FF" maxlength="11" spellcheck="false">
+    <p class="hint">Tip: ak chcete trafiť presne, zadajte čas o pár sekúnd dopredu a potvrďte Enterom v správnom momente.</p>
+    <div class="modal-btns">
+      <button id="setTcCancel">Zrušiť</button>
+      <button id="setTcOk" class="primary">Nastaviť</button>
+    </div>
+  </div>
+</div>
+
+<script src="renderer.js"></script>
+</body>
+</html>
