@@ -466,10 +466,10 @@ $('empty').addEventListener('click', () => logTc());
 $('btnNew').addEventListener('click', newProject);
 $('btnOpen').addEventListener('click', openProject);
 $('btnSave').addEventListener('click', () => save(false));
-$('btnExport').addEventListener('click', exportTxt);
 $('btnMarkers').addEventListener('click', async () => {
   const r = $('btnMarkers').getBoundingClientRect();
   const choice = await window.api.markerMenu({ x: r.left, y: r.bottom + 4 });
+  if (choice === 'txt') exportTxt();
   if (choice === 'avid') exportAvid();
   if (choice === 'premiere') exportPremiere();
   if (choice === 'resolve') exportResolve();

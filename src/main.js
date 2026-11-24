@@ -133,9 +133,11 @@ ipcMain.handle('ask-export', async () => {
 ipcMain.handle('marker-menu', (_e, { x, y }) => new Promise((resolve) => {
   let picked = null;
   const m = Menu.buildFromTemplate([
-    { label: 'Avid Media Composer (.txt)', click: () => { picked = 'avid'; } },
-    { label: 'Adobe Premiere Pro (.xml)', click: () => { picked = 'premiere'; } },
-    { label: 'DaVinci Resolve (.edl)', click: () => { picked = 'resolve'; } }
+    { label: 'Poznámky – textový súbor (.txt)', click: () => { picked = 'txt'; } },
+    { type: 'separator' },
+    { label: 'Markery: Avid Media Composer (.txt)', click: () => { picked = 'avid'; } },
+    { label: 'Markery: Adobe Premiere Pro (.xml)', click: () => { picked = 'premiere'; } },
+    { label: 'Markery: DaVinci Resolve (.edl)', click: () => { picked = 'resolve'; } }
   ]);
   m.popup({ window: win, x: Math.round(x), y: Math.round(y), callback: () => setTimeout(() => resolve(picked), 0) });
 }));

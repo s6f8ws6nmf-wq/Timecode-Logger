@@ -27,7 +27,7 @@ OVLÁDANIE
 - RÝCHLE TLAČIDLÁ (PTZ, CAM A, CAM B, CAM C, CAM D, IBA ZVUK): klik alebo klávesy 1–9
   zapíše TC so štítkom. "Upraviť tlačidlá" = premenovanie, pridanie, odstránenie
   ("Predvolené" obnoví pôvodné). Štítok v tabuľke sa dá prepísať.
-- EXPORT MARKEROV (modré tlačidlo "Export markerov" alebo menu Súbor > Exportovať markery):
+- EXPORT MARKEROV (modré tlačidlo "Export ▾" – obsahuje aj TXT – alebo menu Súbor > Exportovať markery):
   * Avid Media Composer (.txt, Shift+Cmd+E): v okne Markers pravý klik > Import Markers.
   * Adobe Premiere Pro (.xml, Shift+Cmd+P): File > Import > vyberte .xml – vytvorí sa
     sekvencia "… - markery" s markermi na správnych timecodoch (začína na celej hodine).
