@@ -17,6 +17,7 @@
     <button id="btnOpen" title="Otvoriť (⌘O)">Otvoriť</button>
     <button id="btnSave" title="Uložiť (⌘S)">Uložiť</button>
     <button id="btnExport" title="Exportovať TXT (⌘E)">Export TXT</button>
+    <button id="btnAvid" title="Exportovať Avid markery (⇧⌘E)">Avid markery</button>
   </div>
 </header>
 
@@ -45,10 +46,18 @@
   </div>
 </section>
 
+<section class="quick-panel">
+  <div class="quick-head">
+    <span class="quick-title">Rýchle tlačidlá <small>(klik alebo klávesy 1–9 zapíše TC so štítkom)</small></span>
+    <button id="btnEditQuick" class="small" title="Premenovať, pridať alebo odstrániť tlačidlá">Upraviť tlačidlá</button>
+  </div>
+  <div id="quick" class="quick"></div>
+</section>
+
 <section class="table-wrap" id="tableWrap">
   <table class="log">
     <thead>
-      <tr><th class="c-n">#</th><th class="c-tc">Timecode</th><th class="c-note">Poznámka</th><th class="c-act"></th></tr>
+      <tr><th class="c-n">#</th><th class="c-tc">Timecode</th><th class="c-lab">Štítok</th><th class="c-note">Poznámka</th><th class="c-act"></th></tr>
     </thead>
     <tbody id="rows"></tbody>
   </table>

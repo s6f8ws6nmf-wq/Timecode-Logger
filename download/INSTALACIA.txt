@@ -24,5 +24,12 @@ OVLÁDANIE
 - Synchronizácia: "Nastaviť TC" (Cmd+T) – zadáte TC, ktorý má byť práve teraz, Enter.
   Jemné doladenie tlačidlami ±1 fr / ±1 s / ±1 min / ±1 h. "Čas dňa" vráti systémový čas,
   "Od nuly" spustí od 00:00:00:00. Nastavenie sa pamätá aj po reštarte.
-- Uložiť (Cmd+S) uloží projekt (.tclog) a ponúkne export poznámok do .txt.
+- RÝCHLE TLAČIDLÁ (PTZ, CAM A, CAM B, CAM C, CAM D, IBA ZVUK): klik alebo klávesy 1–9
+  zapíše TC so štítkom. "Upraviť tlačidlá" = premenovanie, pridanie, odstránenie
+  ("Predvolené" obnoví pôvodné). Štítok v tabuľke sa dá prepísať.
+- AVID MARKERY (Shift+Cmd+E alebo tlačidlo "Avid markery"): v Media Composeri otvorte
+  sekvenciu, Tools > Markers, pravý klik > Import Markers a vyberte exportovaný .txt.
+  Farba markera podľa tlačidla (1. červená, 2. zelená, 3. modrá, 4. cyan, 5. magenta,
+  6. žltá…), komentár = štítok - poznámka. Stopa V1.
+- Uložiť (Cmd+S) uloží projekt (.tclog) a ponúkne export poznámok do .txt alebo Avid markerov.
   Export TXT kedykoľvek: Cmd+E. Otvoriť projekt: Cmd+O.

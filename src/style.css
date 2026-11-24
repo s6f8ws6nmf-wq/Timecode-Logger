@@ -50,6 +50,8 @@ tr.new td{animation:newrow 1s}
 @keyframes newrow{from{background:rgba(61,255,138,.18)}to{background:transparent}}
 .c-n{width:48px;color:var(--muted);font-variant-numeric:tabular-nums}
 .c-tc{width:150px}
+.c-lab{width:130px}
+td input.labin{color:#ffd60a;font-weight:600;text-transform:none}
 .c-act{width:44px;text-align:right}
 td input{width:100%;background:transparent;border:1px solid transparent;color:var(--text);font:inherit;padding:6px;border-radius:4px}
 td input:hover{border-color:var(--line)}
@@ -75,3 +77,23 @@ td input.tcin.bad{border-color:var(--accent);color:var(--accent)}
 .tc-input:focus{outline:none;border-color:#0a84ff}
 .tc-input.bad{border-color:var(--accent);color:var(--accent)}
 .modal-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+
+.quick-panel{padding:10px 16px 12px;background:var(--panel);border-bottom:1px solid var(--line)}
+.quick-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.quick-title{color:var(--muted);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.quick-title small{text-transform:none;letter-spacing:0;opacity:.8}
+button.small{padding:3px 10px;font-size:12px}
+.quick{display:flex;flex-wrap:wrap;gap:8px}
+.qbtn{position:relative;min-width:110px;height:48px;font-size:16px;font-weight:700;background:#2a3140;border-color:#3b4558;
+  border-radius:8px;padding:0 18px}
+.qbtn:hover{background:#34405a}
+.qbtn kbd{position:absolute;top:3px;right:6px;font:10px Menlo,monospace;color:var(--muted)}
+.qbtn.flash{animation:qflash .35s}
+@keyframes qflash{from{background:#ffd60a;color:#000}to{background:#2a3140}}
+.qedit{display:flex;align-items:center;background:#2a3140;border:1px dashed #5b6880;border-radius:8px;height:48px;padding:0 4px 0 8px}
+.qedit input{width:110px;background:var(--bg);border:1px solid var(--line);color:var(--text);font:700 15px -apple-system,sans-serif;
+  padding:6px;border-radius:5px}
+.qedit input:focus{outline:none;border-color:#0a84ff}
+.qdel{background:transparent;border:none;color:var(--muted);padding:4px 8px}
+.qdel:hover{color:var(--accent);background:transparent}
+.qadd{height:48px;border-style:dashed}

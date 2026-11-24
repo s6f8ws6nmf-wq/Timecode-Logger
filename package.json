@@ -1,14 +1,14 @@
 {
   "name": "timecode-logger",
   "productName": "Timecode Logger",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Freerun PAL 25fps timecode logger pre skriptovanie TV vysielania",
   "main": "src/main.js",
   "author": "Timecode Logger",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "pack:mac": "electron-packager . \"Timecode Logger\" --platform=darwin --arch=x64,arm64 --out=dist --overwrite --app-bundle-id=sk.timecodelogger.app --icon=build/icon.icns --ignore=^/dist --ignore=^/build"
+    "pack:mac": "electron-packager . \"Timecode Logger\" --platform=darwin --arch=x64,arm64 --out=dist --overwrite --app-bundle-id=sk.timecodelogger.app --icon=build/icon.icns --ignore=^/dist --ignore=^/build --ignore=^/download "
   },
   "devDependencies": {
     "electron": "32.3.3",

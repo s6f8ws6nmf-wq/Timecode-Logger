@@ -65,6 +65,60 @@ function tick() {
   requestAnimationFrame(tick);
 }
 
+// ---------- Quick label buttons ----------
+const DEFAULT_LABELS = ['PTZ', 'CAM A', 'CAM B', 'CAM C', 'CAM D', 'IBA ZVUK'];
+let labels = DEFAULT_LABELS.slice();
+try {
+  const saved = JSON.parse(localStorage.getItem('quickLabels') || 'null');
+  if (Array.isArray(saved) && saved.every((x) => typeof x === 'string')) labels = saved;
+} catch (_) {}
+let editQuick = false;
+function saveLabels() { try { localStorage.setItem('quickLabels', JSON.stringify(labels)); } catch (_) {} }
+
+function renderQuick() {
+  const box = $('quick');
+  box.innerHTML = '';
+  box.classList.toggle('editing', editQuick);
+  labels.forEach((lab, i) => {
+    if (editQuick) {
+      const wrap = document.createElement('div'); wrap.className = 'qedit';
+      const inp = document.createElement('input');
+      inp.value = lab; inp.maxLength = 24; inp.spellcheck = false;
+      inp.addEventListener('input', () => { labels[i] = inp.value; saveLabels(); });
+      inp.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') inp.blur(); });
+      const del = document.createElement('button');
+      del.className = 'qdel'; del.textContent = '✕'; del.title = 'Odstrániť tlačidlo';
+      del.addEventListener('click', () => { labels.splice(i, 1); saveLabels(); renderQuick(); });
+      wrap.append(inp, del);
+      box.appendChild(wrap);
+    } else {
+      const b = document.createElement('button');
+      b.className = 'qbtn';
+      b.innerHTML = '';
+      const t = document.createElement('span'); t.textContent = lab || '(bez názvu)';
+      b.appendChild(t);
+      if (i < 9) { const k = document.createElement('kbd'); k.textContent = i + 1; b.appendChild(k); }
+      b.title = `Zapísať TC so štítkom „${lab}“` + (i < 9 ? ` (kláves ${i + 1})` : '');
+      b.addEventListener('click', () => logTc(lab, b));
+      box.appendChild(b);
+    }
+  });
+  if (editQuick) {
+    const add = document.createElement('button'); add.className = 'qadd'; add.textContent = '+ Pridať';
+    add.addEventListener('click', () => {
+      labels.push('NOVÉ'); saveLabels(); renderQuick();
+      const ins = box.querySelectorAll('.qedit input'); const last = ins[ins.length - 1];
+      if (last) { last.focus(); last.select(); }
+    });
+    const reset = document.createElement('button'); reset.className = 'qadd'; reset.textContent = 'Predvolené';
+    reset.title = 'Obnoviť PTZ, CAM A–D, IBA ZVUK';
+    reset.addEventListener('click', () => { labels = DEFAULT_LABELS.slice(); saveLabels(); renderQuick(); });
+    box.append(add, reset);
+  }
+  $('btnEditQuick').textContent = editQuick ? 'Hotovo' : 'Upraviť tlačidlá';
+  $('btnEditQuick').classList.toggle('primary', editQuick);
+}
+
 // ---------- Project state ----------
 let entries = [];
 let filePath = null;
@@ -111,6 +165,14 @@ function render(newId) {
     });
     tdTc.appendChild(tcIn);
 
+    const tdLab = document.createElement('td'); tdLab.className = 'c-lab';
+    const labIn = document.createElement('input');
+    labIn.className = 'labin'; labIn.value = e.label || ''; labIn.placeholder = '—'; labIn.spellcheck = false;
+    labIn.setAttribute('list', 'labelList');
+    labIn.addEventListener('input', () => { e.label = labIn.value; setDirty(true); });
+    labIn.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === 'Escape') labIn.blur(); });
+    tdLab.appendChild(labIn);
+
     const tdNote = document.createElement('td'); tdNote.className = 'c-note';
     const noteIn = document.createElement('input');
     noteIn.className = 'note'; noteIn.value = e.note; noteIn.placeholder = 'Poznámka…';
@@ -129,7 +191,7 @@ function render(newId) {
     });
     tdAct.appendChild(del);
 
-    tr.append(tdN, tdTc, tdNote, tdAct);
+    tr.append(tdN, tdTc, tdLab, tdNote, tdAct);
     tbody.appendChild(tr);
   });
   $('empty').style.display = entries.length ? 'none' : 'block';
@@ -137,20 +199,21 @@ function render(newId) {
   $('count').textContent = `${entries.length} ${entries.length === 1 ? 'záznam' : (entries.length >= 2 && entries.length <= 4 ? 'záznamy' : 'záznamov')}`;
 }
 
-function logTc() {
+function logTc(label, srcBtn) {
   const tc = framesToTc(currentFrames());   // capture immediately
-  const e = { id: nextId++, tc, note: '' };
+  if (typeof label !== 'string') label = '';
+  const e = { id: nextId++, tc, label, note: '' };
   entries.push(e);
   setDirty(true);
   render(e.id);
-  const btn = $('btnLog');
+  const btn = srcBtn || $('btnLog');
   btn.classList.remove('flash'); void btn.offsetWidth; btn.classList.add('flash');
   const row = document.querySelector(`tr[data-id="${e.id}"]`);
   if (row) {
     row.scrollIntoView({ block: 'nearest' });
     row.querySelector('input.note').focus();
   }
-  status(`Zapísaný timecode ${tc}`);
+  status(`Zapísaný timecode ${tc}` + (label ? ` · ${label}` : ''));
 }
 
 // ---------- Project I/O ----------
@@ -158,7 +221,7 @@ function projectData() {
   return {
     app: 'TimecodeLogger', version: 1, fps: FPS,
     name: projectName(), created, modified: new Date().toISOString(),
-    entries: entries.map(({ tc, note }) => ({ tc, note }))
+    entries: entries.map(({ tc, label, note }) => ({ tc, label: label || '', note }))
   };
 }
 function buildTxt() {
@@ -171,7 +234,13 @@ function buildTxt() {
     `Počet záznamov: ${entries.length}`,
     '-'.repeat(60)
   ];
-  entries.forEach((e, i) => lines.push(`${String(i + 1).padStart(3, '0')}  ${e.tc}  ${e.note}`));
+  const w = Math.max(0, ...entries.map((e) => (e.label || '').length));
+  entries.forEach((e, i) => {
+    const parts = [String(i + 1).padStart(3, '0'), e.tc];
+    if (w) parts.push((e.label || '').padEnd(w));
+    parts.push(e.note);
+    lines.push(parts.join('  ').trimEnd());
+  });
   return lines.join('\n') + '\n';
 }
 
@@ -181,7 +250,11 @@ async function save(saveAs = false, askExport = true) {
   if (!r.ok) { status('Uloženie zrušené.'); return false; }
   filePath = r.filePath; setDirty(false);
   status('Uložené: ' + filePath);
-  if (askExport && await window.api.askExport()) await exportTxt();
+  if (askExport) {
+    const choice = await window.api.askExport();
+    if (choice === 'txt') await exportTxt();
+    if (choice === 'avid') await exportAvid();
+  }
   return true;
 }
 async function exportTxt() {
@@ -189,6 +262,27 @@ async function exportTxt() {
   const r = await window.api.exportTxt({ text: buildTxt(), suggestedName: safeFileName(projectName()) });
   if (r.ok) status('Exportované: ' + r.filePath);
 }
+// Avid Media Composer marker list (Tools/Markers > Import Markers):
+// one marker per line, tab separated: User, Timecode, Track, Color, Comment, Duration
+const AVID_COLORS = ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow', 'white', 'black'];
+function avidColor(label) {
+  const i = labels.findIndex((l) => l.toLowerCase() === (label || '').toLowerCase());
+  return i >= 0 ? AVID_COLORS[i % AVID_COLORS.length] : 'red';
+}
+function buildAvid() {
+  const clean = (s) => String(s || '').replace(/[\t\r\n]+/g, ' ').trim();
+  return entries.map((e) => {
+    const comment = [clean(e.label), clean(e.note)].filter(Boolean).join(' - ') || clean(e.tc);
+    return ['TCLogger', e.tc, 'V1', avidColor(e.label), comment, '1'].join('\t');
+  }).join('\n') + '\n';
+}
+async function exportAvid() {
+  document.activeElement && document.activeElement.blur();
+  if (!entries.length) { status('Žiadne záznamy na export.'); return; }
+  const r = await window.api.exportTxt({ text: buildAvid(), suggestedName: safeFileName(projectName()) + ' - Avid markers', title: 'Exportovať Avid markery' });
+  if (r.ok) status('Avid markery exportované: ' + r.filePath);
+}
+
 async function confirmDiscard() {
   if (!dirty) return true;
   const r = await window.api.confirm({
@@ -211,7 +305,7 @@ async function openProject() {
   const r = await window.api.openProject();
   if (!r.ok) return;
   const d = r.data || {};
-  entries = (d.entries || []).map((e) => ({ id: nextId++, tc: framesToTc(parseTc(e.tc) ?? 0), note: e.note || '' }));
+  entries = (d.entries || []).map((e) => ({ id: nextId++, tc: framesToTc(parseTc(e.tc) ?? 0), label: e.label || '', note: e.note || '' }));
   $('projectName').value = d.name || 'Projekt';
   created = d.created || new Date().toISOString();
   filePath = r.filePath;
@@ -247,7 +341,14 @@ document.addEventListener('keydown', (ev) => {
     return;
   }
   if ((ev.metaKey || ev.ctrlKey) && ev.key === 'Enter') { ev.preventDefault(); logTc(); return; }
-  if (ev.code === 'Space' && !isTyping()) { ev.preventDefault(); logTc(); }
+  if (ev.code === 'Space' && !isTyping()) { ev.preventDefault(); logTc(); return; }
+  if (!isTyping() && !editQuick && !ev.metaKey && !ev.ctrlKey && !ev.altKey && /^Digit[1-9]$/.test(ev.code)) {
+    const i = Number(ev.code.slice(5)) - 1;
+    if (i < labels.length) {
+      ev.preventDefault();
+      logTc(labels[i], $('quick').querySelectorAll('.qbtn')[i]);
+    }
+  }
 });
 
 // buttons shouldn't keep focus (so Space never re-clicks them)
@@ -256,13 +357,25 @@ document.addEventListener('mouseup', () => {
   if (a && a.tagName === 'BUTTON') a.blur();
 });
 
-$('btnLog').addEventListener('click', logTc);
-$('addZone').addEventListener('click', logTc);
-$('empty').addEventListener('click', logTc);
+$('btnLog').addEventListener('click', () => logTc());
+$('btnEditQuick').addEventListener('click', () => {
+  editQuick = !editQuick;
+  if (!editQuick) labels = labels.map((l) => l.trim()).filter(Boolean);
+  saveLabels(); renderQuick(); updateLabelList();
+});
+function updateLabelList() {
+  let dl = $('labelList');
+  if (!dl) { dl = document.createElement('datalist'); dl.id = 'labelList'; document.body.appendChild(dl); }
+  dl.innerHTML = '';
+  labels.forEach((l) => { const o = document.createElement('option'); o.value = l; dl.appendChild(o); });
+}
+$('addZone').addEventListener('click', () => logTc());
+$('empty').addEventListener('click', () => logTc());
 $('btnNew').addEventListener('click', newProject);
 $('btnOpen').addEventListener('click', openProject);
 $('btnSave').addEventListener('click', () => save(false));
 $('btnExport').addEventListener('click', exportTxt);
+$('btnAvid').addEventListener('click', exportAvid);
 $('btnSetTc').addEventListener('click', openSetTc);
 $('btnTod').addEventListener('click', () => { offsetMs = 0; saveOffset(); status('Synchronizované na systémový čas dňa.'); });
 $('btnZero').addEventListener('click', () => { setTcNow(0); status('Timecode beží od 00:00:00:00.'); });
@@ -283,7 +396,7 @@ window.api.onMenu((cmd) => {
   if (modalOpen() && cmd !== 'setTc') return;
   ({
     new: newProject, open: openProject, save: () => save(false), saveAs: () => save(true),
-    export: exportTxt, log: logTc, setTc: openSetTc,
+    export: exportTxt, exportAvid, log: () => logTc(), setTc: openSetTc,
     tod: () => { offsetMs = 0; saveOffset(); status('Synchronizované na systémový čas dňa.'); }
   }[cmd] || (() => {}))();
 });
@@ -292,6 +405,8 @@ window.__isDirty = () => dirty;
 window.__saveForClose = () => save(false, false);
 
 updateSyncLabel();
+renderQuick();
+updateLabelList();
 render();
 setDirty(false);
 requestAnimationFrame(tick);

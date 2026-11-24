@@ -21,6 +21,7 @@ function buildMenu() {
         { label: 'Uložiť projekt ako…', accelerator: 'CmdOrCtrl+Shift+S', click: () => send('saveAs') },
         { type: 'separator' },
         { label: 'Exportovať poznámky (TXT)…', accelerator: 'CmdOrCtrl+E', click: () => send('export') },
+        { label: 'Exportovať Avid markery…', accelerator: 'CmdOrCtrl+Shift+E', click: () => send('exportAvid') },
         ...(isMac ? [] : [{ type: 'separator' }, { role: 'quit', label: 'Koniec' }])
       ]
     },
@@ -42,9 +43,9 @@ function buildMenu() {
 function createWindow() {
   win = new BrowserWindow({
     width: 1000,
-    height: 760,
+    height: 840,
     minWidth: 720,
-    minHeight: 520,
+    minHeight: 600,
     title: 'Timecode Logger',
     backgroundColor: '#111317',
     webPreferences: {
@@ -113,17 +114,17 @@ ipcMain.handle('open-project', async () => {
 ipcMain.handle('ask-export', async () => {
   const r = await dialog.showMessageBox(win, {
     type: 'info',
-    buttons: ['Exportovať TXT', 'Nie'],
-    defaultId: 0, cancelId: 1,
+    buttons: ['Exportovať TXT', 'Avid markery', 'Nie'],
+    defaultId: 0, cancelId: 2,
     message: 'Projekt bol uložený.',
-    detail: 'Chcete vyexportovať poznámky do textového súboru (.txt)?'
+    detail: 'Chcete vyexportovať poznámky do textového súboru (.txt) alebo ako Avid markery?'
   });
-  return r.response === 0;
+  return ['txt', 'avid', null][r.response];
 });
 
-ipcMain.handle('export-txt', async (_e, { text, suggestedName }) => {
+ipcMain.handle('export-txt', async (_e, { text, suggestedName, title }) => {
   const r = await dialog.showSaveDialog(win, {
-    title: 'Exportovať poznámky',
+    title: title || 'Exportovať poznámky',
     defaultPath: (suggestedName || 'Poznamky') + '.txt',
     filters: [{ name: 'Textový súbor', extensions: ['txt'] }]
   });
