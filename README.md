@@ -9,10 +9,8 @@ Aplikácia pre macOS (Big Sur 11 a novší) na skriptovanie televízneho vysiela
 
 ## Stiahnutie
 
-Hotové DMG nájdete v sekcii **[Releases](../../releases/latest)**:
-
-- `Timecode-Logger-AppleSilicon.dmg` – Macy s čipom M1/M2/…
-- `Timecode-Logger-Intel.dmg` – Macy s procesorom Intel
+- **[Timecode-Logger-AppleSilicon.dmg](https://media.githubusercontent.com/media/s6f8ws6nmf-wq/Timecode-Logger/main/download/Timecode-Logger-AppleSilicon.dmg)** – Macy s čipom M1/M2/…
+- **[Timecode-Logger-Intel.dmg](https://media.githubusercontent.com/media/s6f8ws6nmf-wq/Timecode-Logger/main/download/Timecode-Logger-Intel.dmg)** – Macy s procesorom Intel
 
 Prvé spustenie: pravý klik na aplikáciu → Otvoriť. Ak macOS hlási, že je „poškodená“:
 
