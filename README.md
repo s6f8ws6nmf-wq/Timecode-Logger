@@ -2,6 +2,7 @@
 
 Aplikácia pre macOS (Big Sur 11 a novší) na skriptovanie televízneho vysielania.
 
+- Projekt, sekvencia a výrobný deň – názov exportu SEKVENCIA_VYROBNYDEN_PROJEKT
 - Freerun timecode PAL 25 fps (predvolene podľa času dňa), stále viditeľný
 - Zápis aktuálneho TC do tabuľky (tlačidlo, medzerník, ⌘↩ alebo klik do tabuľky) + poznámka
 - Ručná úprava timecodu v tabuľke a ručná synchronizácia (Nastaviť TC, ±1 fr/s/min/h)

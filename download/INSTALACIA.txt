@@ -17,6 +17,8 @@ TIMECODE LOGGER – inštalácia (macOS Big Sur 11 a novší)
    a spustite ju znova.
 
 OVLÁDANIE
+- Hore vyplňte PROJEKT, SEKVENCIA a VÝROBNÝ DEŇ. Uložený projekt aj všetky exporty dostanú
+  názov SEKVENCIA_VYROBNYDEN_PROJEKT (prázdne pole sa vynechá).
 - Timecode beží stále (freerun, PAL 25 fps), predvolene podľa času dňa.
 - ZAPÍSAŤ TC / medzerník / Cmd+Enter / klik do tabuľky = zapíše aktuálny timecode,
   kurzor skočí do poznámky. Enter poznámku potvrdí, ďalší medzerník zapíše ďalší TC.

@@ -135,6 +135,14 @@ function setDirty(v) {
 function projectName() { return $('projectName').value.trim() || 'Bez názvu'; }
 function status(msg) { $('status').textContent = msg; }
 function safeFileName(s) { return s.replace(/[\/\\:*?"<>|]/g, '-').trim() || 'Projekt'; }
+function sequenceName() { return $('sequenceName').value.trim(); }
+function shootDay() { return $('shootDay').value.trim(); }
+// File name for saving/exports: SEKVENCIA_VYROBNYDEN_PROJEKT (empty parts are skipped)
+function exportBase() {
+  const parts = [sequenceName(), shootDay(), $('projectName').value.trim()]
+    .map((p) => p.replace(/[\/\\:*?"<>|]/g, '-').trim()).filter(Boolean);
+  return parts.length ? parts.join('_') : 'Projekt';
+}
 
 // ---------- Table ----------
 function render(newId) {
@@ -220,7 +228,7 @@ function logTc(label, srcBtn) {
 function projectData() {
   return {
     app: 'TimecodeLogger', version: 1, fps: FPS,
-    name: projectName(), created, modified: new Date().toISOString(),
+    name: projectName(), sequence: sequenceName(), shootDay: shootDay(), created, modified: new Date().toISOString(),
     entries: entries.map(({ tc, label, note }) => ({ tc, label: label || '', note }))
   };
 }
@@ -229,6 +237,8 @@ function buildTxt() {
   const d = `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()}`;
   const lines = [
     `Projekt: ${projectName()}`,
+    ...(sequenceName() ? [`Sekvencia: ${sequenceName()}`] : []),
+    ...(shootDay() ? [`Výrobný deň: ${shootDay()}`] : []),
     `Export: ${d} ${pad(now.getHours())}:${pad(now.getMinutes())}`,
     `Timecode: PAL 25 fps`,
     `Počet záznamov: ${entries.length}`,
@@ -246,7 +256,7 @@ function buildTxt() {
 
 async function save(saveAs = false, askExport = true) {
   document.activeElement && document.activeElement.blur(); // commit pending edits
-  const r = await window.api.saveProject({ data: projectData(), filePath, saveAs, suggestedName: safeFileName(projectName()) });
+  const r = await window.api.saveProject({ data: projectData(), filePath, saveAs, suggestedName: exportBase() });
   if (!r.ok) { status('Uloženie zrušené.'); return false; }
   filePath = r.filePath; setDirty(false);
   status('Uložené: ' + filePath);
@@ -261,7 +271,7 @@ async function save(saveAs = false, askExport = true) {
 }
 async function exportTxt() {
   document.activeElement && document.activeElement.blur();
-  const r = await window.api.exportTxt({ text: buildTxt(), suggestedName: safeFileName(projectName()) });
+  const r = await window.api.exportTxt({ text: buildTxt(), suggestedName: exportBase() });
   if (r.ok) status('Exportované: ' + r.filePath);
 }
 // Avid Media Composer marker list (Tools/Markers > Import Markers):
@@ -281,7 +291,7 @@ function buildAvid() {
 async function exportAvid() {
   document.activeElement && document.activeElement.blur();
   if (!entries.length) { status('Žiadne záznamy na export.'); return; }
-  const r = await window.api.exportTxt({ text: buildAvid(), suggestedName: safeFileName(projectName()) + ' - Avid markers', title: 'Exportovať Avid markery' });
+  const r = await window.api.exportTxt({ text: buildAvid(), suggestedName: exportBase(), title: 'Exportovať Avid markery' });
   if (r.ok) status('Avid markery exportované: ' + r.filePath);
 }
 
@@ -311,7 +321,7 @@ function buildPremiere() {
 <!DOCTYPE xmeml>
 <xmeml version="4">
   <sequence id="sequence-1">
-    <name>${xmlEsc(projectName())} - markery</name>
+    <name>${xmlEsc(exportBase())}</name>
     <duration>${dur}</duration>
     ${rate}
     <timecode>
@@ -349,7 +359,7 @@ ${markers}
 // ---------- DaVinci Resolve: timeline markers EDL ----------
 const RESOLVE_COLORS = { red: 'Red', green: 'Green', blue: 'Blue', cyan: 'Cyan', magenta: 'Fuchsia', yellow: 'Yellow', white: 'Cream', black: 'Cocoa' };
 function buildResolve() {
-  const lines = [`TITLE: ${oneLine(projectName())}`, 'FCM: NON-DROP FRAME', ''];
+  const lines = [`TITLE: ${oneLine(exportBase())}`, 'FCM: NON-DROP FRAME', ''];
   sortedEntries().forEach((e, i) => {
     const n = String(i + 1).padStart(3, '0');
     const tin = framesToTc(e.f), tout = framesToTc(e.f + 1);
@@ -364,12 +374,11 @@ function buildResolve() {
 async function exportMarkers(kind) {
   document.activeElement && document.activeElement.blur();
   if (!entries.length) { status('Žiadne záznamy na export.'); return; }
-  const base = safeFileName(projectName());
   const cfg = {
     premiere: { text: buildPremiere, ext: 'xml', filterName: 'Premiere Pro XML', suffix: 'Premiere markers', title: 'Exportovať markery pre Premiere Pro', label: 'Premiere Pro' },
     resolve: { text: buildResolve, ext: 'edl', filterName: 'EDL', suffix: 'Resolve markers', title: 'Exportovať markery pre DaVinci Resolve', label: 'DaVinci Resolve' }
   }[kind];
-  const r = await window.api.exportTxt({ text: cfg.text(), suggestedName: `${base} - ${cfg.suffix}`, title: cfg.title, ext: cfg.ext, filterName: cfg.filterName });
+  const r = await window.api.exportTxt({ text: cfg.text(), suggestedName: exportBase(), title: cfg.title, ext: cfg.ext, filterName: cfg.filterName });
   if (r.ok) status(`Markery pre ${cfg.label} exportované: ${r.filePath}`);
 }
 const exportPremiere = () => exportMarkers('premiere');
@@ -390,6 +399,7 @@ async function newProject() {
   if (!(await confirmDiscard())) return;
   entries = []; filePath = null; created = new Date().toISOString();
   $('projectName').value = 'Nový projekt';
+  $('sequenceName').value = ''; $('shootDay').value = '';
   render(); setDirty(false); status('Nový projekt.');
 }
 async function openProject() {
@@ -399,6 +409,7 @@ async function openProject() {
   const d = r.data || {};
   entries = (d.entries || []).map((e) => ({ id: nextId++, tc: framesToTc(parseTc(e.tc) ?? 0), label: e.label || '', note: e.note || '' }));
   $('projectName').value = d.name || 'Projekt';
+  $('sequenceName').value = d.sequence || ''; $('shootDay').value = d.shootDay || '';
   created = d.created || new Date().toISOString();
   filePath = r.filePath;
   render(); setDirty(false); status('Otvorené: ' + filePath);
@@ -481,8 +492,10 @@ $('setTcOk').addEventListener('click', applySetTc);
 $('setTcCancel').addEventListener('click', closeSetTc);
 $('setTcInput').addEventListener('input', (e) => e.target.classList.toggle('bad', parseTc(e.target.value) === null));
 $('modal').addEventListener('mousedown', (e) => { if (e.target.id === 'modal') closeSetTc(); });
-$('projectName').addEventListener('input', () => setDirty(true));
-$('projectName').addEventListener('keydown', (e) => { if (e.key === 'Enter') e.target.blur(); });
+['projectName', 'sequenceName', 'shootDay'].forEach((id) => {
+  $(id).addEventListener('input', () => setDirty(true));
+  $(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') e.target.blur(); });
+});
 document.querySelectorAll('[data-nudge]').forEach((b) => b.addEventListener('click', () => {
   offsetMs += Number(b.dataset.nudge) * 1000; saveOffset();
 }));
