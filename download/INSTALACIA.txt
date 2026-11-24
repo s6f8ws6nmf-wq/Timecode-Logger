@@ -1,0 +1,28 @@
+TIMECODE LOGGER – inštalácia (macOS Big Sur 11 a novší)
+========================================================
+
+1. Vyberte správnu verziu:
+   - Mac s procesorom Apple (M1/M2/…):  Timecode-Logger-AppleSilicon.dmg
+   - Mac s procesorom Intel:            Timecode-Logger-Intel.dmg
+   (Ponuka  > O tomto Macu > Čip / Procesor)
+
+2. Otvorte .dmg a pretiahnite "Timecode Logger" do priečinka Aplikácie (Applications).
+
+3. Prvé spustenie – aplikácia nie je podpísaná certifikátom Apple, preto:
+   - v Aplikáciách na ňu kliknite PRAVÝM tlačidlom > Otvoriť > Otvoriť.
+   Ak macOS hlási, že je "poškodená" alebo sa nedá otvoriť, otvorte Terminál a zadajte:
+
+     xattr -cr "/Applications/Timecode Logger.app"
+
+   a spustite ju znova.
+
+OVLÁDANIE
+- Timecode beží stále (freerun, PAL 25 fps), predvolene podľa času dňa.
+- ZAPÍSAŤ TC / medzerník / Cmd+Enter / klik do tabuľky = zapíše aktuálny timecode,
+  kurzor skočí do poznámky. Enter poznámku potvrdí, ďalší medzerník zapíše ďalší TC.
+- Timecode v tabuľke sa dá prepísať kliknutím (formát HH:MM:SS:FF alebo len číslice, napr. 10000512).
+- Synchronizácia: "Nastaviť TC" (Cmd+T) – zadáte TC, ktorý má byť práve teraz, Enter.
+  Jemné doladenie tlačidlami ±1 fr / ±1 s / ±1 min / ±1 h. "Čas dňa" vráti systémový čas,
+  "Od nuly" spustí od 00:00:00:00. Nastavenie sa pamätá aj po reštarte.
+- Uložiť (Cmd+S) uloží projekt (.tclog) a ponúkne export poznámok do .txt.
+  Export TXT kedykoľvek: Cmd+E. Otvoriť projekt: Cmd+O.
