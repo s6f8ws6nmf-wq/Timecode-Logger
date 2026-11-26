@@ -17,7 +17,8 @@ panely a lištu kariet), na starších systémoch matný materiál.
 - **Hľadať** – rovnaké vyhľadávanie ako na stránke
 - **Moje** – rozpozerané videá (pokračuje tam, kde ste skončili), obľúbené relácie, pozreté
 - prehrávač: menu **Obraz** v lište – *Roztiahnuť na 16:9* pre videá stlačené na 4:3 (pamätá sa pre každú reláciu),
-  *Vyplniť obrazovku*, *Pôvodný pomer strán*
+  *Vyplniť obrazovku*, *Pôvodný pomer strán*; menu **Synchronizácia zvuku** – posun zvuku po 50 ms
+  alebo predvoľby ±100 až ±1000 ms (tiež sa pamätá pre každú reláciu)
 - detail relácie: popis, skupiny (Archív, Bonusy, Videá…), zoznam epizód
 
 ## Zdroje videí

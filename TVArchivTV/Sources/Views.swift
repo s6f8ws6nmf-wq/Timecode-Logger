@@ -99,7 +99,7 @@ struct ShelfRow<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title).font(.title3.weight(.bold)).padding(.horizontal, 80)
+            Text(title).font(.title3.weight(.bold)).lineLimit(1).padding(.horizontal, 80)
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(alignment: .top, spacing: 40) { content }
                     .padding(.horizontal, 80)
@@ -135,7 +135,9 @@ struct VideoGrid: View {
 struct PageTitle: View {
     let text: String
     var body: some View {
-        Text(text).font(.system(size: 64, weight: .bold)).padding(.top, 20)
+        Text(text).font(.system(size: 64, weight: .bold))
+            .lineLimit(1).minimumScaleFactor(0.5)
+            .padding(.top, 20)
     }
 }
 
@@ -210,8 +212,9 @@ struct HeroCarousel: View {
             LinearGradient(colors: [.clear, .black.opacity(0.35), .black.opacity(0.9)], startPoint: .top, endPoint: .bottom)
             VStack(alignment: .leading, spacing: 14) {
                 Text("NOVÁ EPIZÓDA").font(.caption.weight(.heavy)).foregroundStyle(Theme.accent)
-                Text(item.video.showTitle).font(.system(size: 62, weight: .bold)).lineLimit(1)
-                Text(item.video.title).font(.title3).foregroundStyle(.white.opacity(0.85)).lineLimit(1)
+                Text(item.video.showTitle).font(.system(size: 62, weight: .bold))
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                Text(item.video.title).font(.title3).foregroundStyle(.white.opacity(0.85)).lineLimit(2)
                 HStack(spacing: 16) {
                     Label("Prehrať", systemImage: "play.fill")
                         .font(.headline)
@@ -223,6 +226,7 @@ struct HeroCarousel: View {
                 .padding(.top, 10)
             }
             .foregroundStyle(.white)
+            .frame(maxWidth: size.width - 100, alignment: .leading)
             .padding(50)
         }
         .frame(width: size.width, height: size.height)
@@ -277,6 +281,7 @@ struct ChannelsView: View {
                             NavigationLink(value: Route.list(title: ch.name, path: ch.path)) {
                                 VStack(alignment: .leading, spacing: 10) {
                                     Text(ch.name).font(.system(size: 40, weight: .bold))
+                                        .lineLimit(1).minimumScaleFactor(0.6)
                                     Text(ch.source.playable ? ch.source.name : "Len s predplatným")
                                         .font(.caption).foregroundStyle(.secondary)
                                 }
@@ -502,12 +507,17 @@ struct ShowDetailView: View {
             Text(d.card.title)
                 .font(.system(size: 86, weight: .heavy))
                 .lineLimit(2)
+                .minimumScaleFactor(0.5)
+                .frame(maxWidth: 1500, alignment: .leading)
                 .shadow(radius: 20)
             if !d.card.info.isEmpty {
-                Text(d.card.info).font(.headline).foregroundStyle(.secondary)
+                Text(d.card.info).font(.headline).foregroundStyle(.secondary).lineLimit(2)
+                    .frame(maxWidth: 1500, alignment: .leading)
             }
             if !d.description.isEmpty {
-                Text(d.description).font(.body).lineLimit(4).frame(maxWidth: 1100, alignment: .leading)
+                Text(d.description).font(.body).lineLimit(4)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: 1100, alignment: .leading)
                     .foregroundStyle(.white.opacity(0.85))
             }
 
@@ -516,7 +526,7 @@ struct ShowDetailView: View {
                     if let current, let first = resumeItem(in: current) {
                         Button { player.play(first) } label: {
                             Label(library.entry(for: first.path) != nil ? "Pokračovať" : "Prehrať najnovšie",
-                                  systemImage: "play.fill")
+                                  systemImage: "play.fill").lineLimit(1)
                                 .padding(.horizontal, 20)
                         }
                         .glassButton(prominent: true)
@@ -534,7 +544,9 @@ struct ShowDetailView: View {
                     GlassGroup(spacing: 14) {
                         HStack(spacing: 14) {
                             ForEach(d.groups) { g in
-                                Button { group = g.id } label: { Text("\(g.id)  \(g.items.count)") }
+                                Button { group = g.id } label: {
+                                    Text("\(g.id)  \(g.items.count)").lineLimit(1).frame(maxWidth: 460)
+                                }
                                     .glassButton(prominent: g.id == current.id)
                             }
                         }
@@ -546,10 +558,12 @@ struct ShowDetailView: View {
                 LazyVStack(alignment: .leading, spacing: 18) {
                     ForEach(current.items) { EpisodeRow(item: $0) }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 Text("Táto relácia zatiaľ nemá žiadne videá.").foregroundStyle(.secondary)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 80)
         .padding(.bottom, 80)
     }
@@ -585,19 +599,22 @@ struct EpisodeRow: View {
                     .frame(width: 50)
                 VStack(alignment: .leading, spacing: 8) {
                     Text(item.title).font(.headline).lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     if let entry, entry.fraction > 0.01, !entry.finished {
                         ProgressView(value: entry.fraction).frame(maxWidth: 520)
                     }
                 }
-                Spacer(minLength: 20)
+                .layoutPriority(1)
                 if player.loadingPath == item.path { ProgressView() }
-                SourceBadge(source: item.source)
+                SourceBadge(source: item.source).fixedSize()
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .glassButton()
+        .frame(maxWidth: .infinity, alignment: .leading)
         .contextMenu {
             Button("Prehrať od začiatku") { player.play(item, fromStart: true) }
             if entry != nil { Button("Odstrániť z histórie", role: .destructive) { library.remove(item.path) } }

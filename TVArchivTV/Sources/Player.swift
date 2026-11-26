@@ -39,12 +39,33 @@ enum PictureMode: String, CaseIterable {
     }
 }
 
+/// Posun zvuku voči obrazu (v sekundách), pamätá sa pre každú reláciu.
+enum AudioSync {
+    static func saved(for showPath: String) -> Double {
+        UserDefaults.standard.double(forKey: "avsync." + showPath)
+    }
+
+    static func save(_ value: Double, for showPath: String) {
+        UserDefaults.standard.set(value, forKey: "avsync." + showPath)
+    }
+}
+
 final class VideoPlayerController: AVPlayerViewController {
     private let item: VideoItem
     private weak var library: Library?
     private var timeObserver: Any?
     private var lastSaved: Double = -10
     private var pictureMode: PictureMode = .original
+
+    // Synchronizácia zvuku: pri posune ≠ 0 hrá obraz hlavný prehrávač (stlmený)
+    // a zvuk druhý prehrávač, posunutý o audioOffset sekúnd (kladné = zvuk neskôr).
+    private var streamURL: URL?
+    private var streamHeaders: [String: String] = [:]
+    private var audioOffset: Double = 0
+    private var audioPlayer: AVPlayer?
+    private var statusObservation: NSKeyValueObservation?
+    private var jumpObserver: NSObjectProtocol?
+    private var driftTimer: Timer?
 
     init(item: VideoItem, library: Library) {
         self.item = item
@@ -58,6 +79,8 @@ final class VideoPlayerController: AVPlayerViewController {
     func load(url: URL, headers: [String: String], start: Double) {
         var allHeaders = headers
         allHeaders["User-Agent"] = Net.userAgent
+        streamURL = url
+        streamHeaders = allHeaders
         let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": allHeaders])
         let playerItem = AVPlayerItem(asset: asset)
         playerItem.externalMetadata = metadata()
@@ -70,12 +93,127 @@ final class VideoPlayerController: AVPlayerViewController {
                                                       queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.saveProgress() }
         }
+        audioOffset = AudioSync.saved(for: item.showPath)
+        statusObservation = player.observe(\.timeControlStatus, options: [.new]) { [weak self] _, _ in
+            DispatchQueue.main.async { MainActor.assumeIsolated { self?.resyncAudio() } }
+        }
+        jumpObserver = NotificationCenter.default.addObserver(forName: AVPlayerItem.timeJumpedNotification,
+                                                              object: playerItem, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.resyncAudio() }
+        }
+        configureAudioSync()
         player.play()
     }
 
     private func applyPictureMode() {
         videoGravity = pictureMode.gravity
-        transportBarCustomMenuItems = [pictureMenu()]
+        rebuildMenus()
+    }
+
+    private func rebuildMenus() {
+        transportBarCustomMenuItems = [pictureMenu(), audioSyncMenu()]
+    }
+
+    // MARK: - Synchronizácia zvuku a obrazu
+
+    private func configureAudioSync() {
+        guard let player else { return }
+        if abs(audioOffset) < 0.001 {
+            stopAudioPlayer()
+            player.isMuted = false
+            return
+        }
+        if audioPlayer == nil, let url = streamURL {
+            let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": streamHeaders])
+            let item = AVPlayerItem(asset: asset)
+            item.preferredPeakBitRate = 1 // pri HLS stačí najnižšia kvalita – berieme z nej len zvuk
+            let a = AVPlayer(playerItem: item)
+            a.automaticallyWaitsToMinimizeStalling = false
+            audioPlayer = a
+            driftTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
+                MainActor.assumeIsolated { self?.checkDrift() }
+            }
+        }
+        player.isMuted = true
+        resyncAudio()
+    }
+
+    private func stopAudioPlayer() {
+        driftTimer?.invalidate()
+        driftTimer = nil
+        audioPlayer?.pause()
+        audioPlayer = nil
+    }
+
+    /// Nastaví zvukový prehrávač na čas obrazu mínus posun a spustí ho v rovnakom okamihu.
+    private func resyncAudio() {
+        guard let player, let audio = audioPlayer else { return }
+        let playing = player.timeControlStatus == .playing
+        let lead = 0.25
+        let videoNow = player.currentTime().seconds
+        guard videoNow.isFinite else { return }
+        if !playing {
+            audio.pause()
+            let t = max(0, videoNow - audioOffset)
+            audio.seek(to: CMTime(seconds: t, preferredTimescale: 600), toleranceBefore: .zero, toleranceAfter: .zero)
+            return
+        }
+        let rate = player.rate > 0 ? player.rate : 1
+        let target = videoNow + lead * Double(rate) - audioOffset
+        if target < 0 {
+            // zvuk má začať až neskôr, než je začiatok záznamu
+            audio.pause()
+            audio.seek(to: .zero)
+            DispatchQueue.main.asyncAfter(deadline: .now() + (-target)) { [weak self] in
+                MainActor.assumeIsolated { self?.resyncAudio() }
+            }
+            return
+        }
+        let host = CMTimeAdd(CMClockGetTime(CMClockGetHostTimeClock()), CMTime(seconds: lead, preferredTimescale: 1_000_000))
+        audio.setRate(rate, time: CMTime(seconds: target, preferredTimescale: 600), atHostTime: host)
+    }
+
+    private func checkDrift() {
+        guard let player, let audio = audioPlayer, player.timeControlStatus == .playing else { return }
+        let expected = player.currentTime().seconds - audioOffset
+        let actual = audio.currentTime().seconds
+        guard expected.isFinite, actual.isFinite else { return }
+        if audio.timeControlStatus != .playing || abs(actual - expected) > 0.06 {
+            resyncAudio()
+        }
+    }
+
+    private func setAudioOffset(_ value: Double) {
+        audioOffset = (value * 1000).rounded() / 1000
+        AudioSync.save(audioOffset, for: item.showPath)
+        configureAudioSync()
+        rebuildMenus()
+    }
+
+    private func audioSyncMenu() -> UIMenu {
+        let ms = Int((audioOffset * 1000).rounded())
+        let current = ms == 0 ? "bez posunu" : (ms > 0 ? "zvuk neskôr o \(ms) ms" : "zvuk skôr o \(-ms) ms")
+        let step: [UIMenuElement] = [
+            UIAction(title: "Posunúť zvuk neskôr (+50 ms)", subtitle: "keď zvuk predbieha obraz",
+                     image: UIImage(systemName: "plus.circle")) { [weak self] _ in
+                guard let self else { return }
+                self.setAudioOffset(self.audioOffset + 0.05)
+            },
+            UIAction(title: "Posunúť zvuk skôr (−50 ms)", subtitle: "keď zvuk mešká za obrazom",
+                     image: UIImage(systemName: "minus.circle")) { [weak self] _ in
+                guard let self else { return }
+                self.setAudioOffset(self.audioOffset - 0.05)
+            }
+        ]
+        let presets: [UIMenuElement] = [-1.0, -0.5, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.5, 1.0].map { v in
+            let vms = Int((v * 1000).rounded())
+            let title = vms == 0 ? "Bez posunu" : (vms > 0 ? "Zvuk neskôr o \(vms) ms" : "Zvuk skôr o \(-vms) ms")
+            return UIAction(title: title, state: vms == ms ? .on : .off) { [weak self] _ in self?.setAudioOffset(v) }
+        }
+        return UIMenu(title: "Synchronizácia zvuku", subtitle: current, image: UIImage(systemName: "waveform"), children: [
+            UIMenu(title: "", options: .displayInline, children: step),
+            UIMenu(title: "Predvoľby", image: UIImage(systemName: "list.bullet"), children: presets)
+        ])
     }
 
     /// Menu „Obraz“ v lište prehrávača (potiahnutím nadol / tlačidlom v lište).
@@ -89,7 +227,7 @@ final class VideoPlayerController: AVPlayerViewController {
                 self.applyPictureMode()
             }
         }
-        return UIMenu(title: "Obraz", image: UIImage(systemName: "aspectratio"),
+        return UIMenu(title: "Obraz", subtitle: pictureMode.title, image: UIImage(systemName: "aspectratio"),
                       options: .singleSelection, children: actions)
     }
 
@@ -109,6 +247,10 @@ final class VideoPlayerController: AVPlayerViewController {
             player?.pause()
             if let timeObserver { player?.removeTimeObserver(timeObserver) }
             timeObserver = nil
+            statusObservation = nil
+            if let jumpObserver { NotificationCenter.default.removeObserver(jumpObserver) }
+            jumpObserver = nil
+            stopAudioPlayer()
         }
     }
 
