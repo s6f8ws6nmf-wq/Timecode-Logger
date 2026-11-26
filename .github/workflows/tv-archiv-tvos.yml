@@ -1,0 +1,57 @@
+name: TV Archív – tvOS IPA
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "TVArchivTV/**"
+      - ".github/workflows/tv-archiv-tvos.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: XcodeGen
+        run: |
+          brew install xcodegen
+          cd TVArchivTV && xcodegen generate
+
+      - name: Build (bez podpisu)
+        run: |
+          cd TVArchivTV
+          xcodebuild -project TVArchivTV.xcodeproj -scheme TVArchivTV \
+            -configuration Release -sdk appletvos -destination 'generic/platform=tvOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+
+      - name: Zabaliť IPA
+        run: |
+          cd TVArchivTV
+          APP=$(find build/Build/Products/Release-appletvos -maxdepth 1 -name '*.app' | head -1)
+          echo "App: $APP"
+          rm -rf Payload && mkdir Payload && cp -R "$APP" Payload/
+          rm -f TV-Archiv-tvOS.ipa
+          zip -qry TV-Archiv-tvOS.ipa Payload
+          ls -la TV-Archiv-tvOS.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TV-Archiv-tvOS
+          path: TVArchivTV/TV-Archiv-tvOS.ipa
+
+      - name: Uložiť IPA do repozitára (download/)
+        run: |
+          mkdir -p download
+          rm -f download/HotelParadise-tvOS-unsigned.ipa
+          cp TVArchivTV/TV-Archiv-tvOS.ipa download/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A download/
+          git diff --cached --quiet || git commit -m "TV Archív tvOS: nové IPA [skip ci]"
+          git pull --rebase --autostash || true
+          git push

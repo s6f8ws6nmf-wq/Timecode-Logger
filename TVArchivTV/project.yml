@@ -1,0 +1,38 @@
+name: TVArchivTV
+options:
+  bundleIdPrefix: local.tvarchiv
+  deploymentTarget:
+    tvOS: "17.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "2.0.0"
+    CURRENT_PROJECT_VERSION: "2"
+targets:
+  TVArchivTV:
+    type: application
+    platform: tvOS
+    sources:
+      - Sources
+      - Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: local.tvarchiv.player
+        PRODUCT_NAME: "TV Archiv"
+        ASSETCATALOG_COMPILER_APPICON_NAME: "App Icon & Top Shelf Image"
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        TARGETED_DEVICE_FAMILY: "3"
+        CODE_SIGN_STYLE: Automatic
+    info:
+      path: Sources/Info.plist
+      properties:
+        CFBundleDisplayName: "TV Archív"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleDevelopmentRegion: sk
+        UIUserInterfaceStyle: Light
+        UIRequiredDeviceCapabilities: [arm64]
+        UIAppFonts:
+          - PlayfairDisplaySC-Bold.ttf
+          - PlayfairDisplaySC-Regular.ttf
+        LSApplicationQueriesSchemes: [youtube]
