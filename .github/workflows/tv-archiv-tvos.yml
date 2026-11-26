@@ -10,6 +10,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: tvos-ipa-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: macos-15
@@ -55,12 +59,20 @@ jobs:
 
       - name: Uložiť IPA do repozitára (download/)
         run: |
-          mkdir -p download
-          rm -f download/HotelParadise-tvOS-unsigned.ipa
-          cp TVArchivTV/TV-Archiv-tvOS.ipa download/
+          BRANCH="${GITHUB_REF_NAME}"
+          cp TVArchivTV/TV-Archiv-tvOS.ipa "$RUNNER_TEMP/app.ipa"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A download/
-          git diff --cached --quiet || git commit -m "TV Archív tvOS: nové IPA [skip ci]"
-          git pull --rebase --autostash || true
-          git push
+          for i in 1 2 3 4; do
+            git fetch origin "$BRANCH"
+            git checkout -B publish "origin/$BRANCH"
+            mkdir -p download
+            rm -f download/HotelParadise-tvOS-unsigned.ipa
+            cp "$RUNNER_TEMP/app.ipa" download/TV-Archiv-tvOS.ipa
+            git add -A download/
+            git diff --cached --quiet && exit 0
+            git commit -m "TV Archív tvOS: nové IPA [skip ci]"
+            git push origin "HEAD:$BRANCH" && exit 0
+            sleep 5
+          done
+          exit 1
