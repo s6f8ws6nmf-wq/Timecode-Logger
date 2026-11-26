@@ -16,6 +16,8 @@ panely a lištu kariet), na starších systémoch matný materiál.
 - **A – Z** – všetky relácie podľa písmen
 - **Hľadať** – rovnaké vyhľadávanie ako na stránke
 - **Moje** – rozpozerané videá (pokračuje tam, kde ste skončili), obľúbené relácie, pozreté
+- prehrávač: menu **Obraz** v lište – *Roztiahnuť na 16:9* pre videá stlačené na 4:3 (pamätá sa pre každú reláciu),
+  *Vyplniť obrazovku*, *Pôvodný pomer strán*
 - detail relácie: popis, skupiny (Archív, Bonusy, Videá…), zoznam epizód
 
 ## Zdroje videí

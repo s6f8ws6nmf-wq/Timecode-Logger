@@ -6,8 +6,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "3.0.0"
-    CURRENT_PROJECT_VERSION: "3"
+    MARKETING_VERSION: "3.1.0"
+    CURRENT_PROJECT_VERSION: "4"
 targets:
   TVArchivTV:
     type: application
@@ -31,5 +31,6 @@ targets:
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleDevelopmentRegion: sk
         UIUserInterfaceStyle: Dark
+        UILaunchStoryboardName: LaunchScreen
         UIRequiredDeviceCapabilities: [arm64]
         LSApplicationQueriesSchemes: [youtube]
