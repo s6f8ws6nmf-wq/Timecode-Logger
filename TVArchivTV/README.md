@@ -6,6 +6,11 @@ Aplikácia pre tvOS 17+, ktorá prehráva videá z [tv-archiv.sk](https://www.tv
 
 ## Čo vie
 
+Vzhľad je ako aplikácia Apple TV: tmavé rozhranie, veľký pás najnovších epizód, vodorovné police
+a pozadie, ktoré sa mení podľa vybranej položky. Na tvOS 26 používa **Liquid Glass** (sklenené tlačidlá,
+panely a lištu kariet), na starších systémoch matný materiál.
+
+- **Domov** – najnovšie epizódy, Pokračovať v pozeraní, Obľúbené, Dnes najpozeranejšie seriály, Celé filmy
 - **Najnovšie** – posledné pridané videá zo stránky
 - **Stanice** – JOJ, Markíza, STVR, ČT, Nova, TV Lux… → relácie stanice
 - **A – Z** – všetky relácie podľa písmen

@@ -4,6 +4,7 @@ import SwiftUI
 struct TVArchivApp: App {
     @StateObject private var library: Library
     @StateObject private var player: PlayerCenter
+    @StateObject private var backdrop = Backdrop()
 
     init() {
         let lib = Library()
@@ -16,6 +17,9 @@ struct TVArchivApp: App {
             RootView()
                 .environmentObject(library)
                 .environmentObject(player)
+                .environmentObject(backdrop)
+                .preferredColorScheme(.dark)
+                .tint(Theme.accent)
         }
     }
 }
@@ -30,27 +34,31 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            Theme.background.ignoresSafeArea()
+            BackdropView()
             TabView {
+                Stack { HomeView() }
+                    .tabItem { Label("Domov", systemImage: "house.fill") }
                 Stack { LatestView() }
-                    .tabItem { Text("Najnovšie") }
+                    .tabItem { Label("Najnovšie", systemImage: "clock.fill") }
                 Stack { ChannelsView() }
-                    .tabItem { Text("Stanice") }
+                    .tabItem { Label("Stanice", systemImage: "tv.fill") }
                 Stack { AZView() }
-                    .tabItem { Text("A – Z") }
+                    .tabItem { Label("A – Z", systemImage: "textformat") }
+                Stack { MineView() }
+                    .tabItem { Label("Moje", systemImage: "person.crop.circle") }
                 Stack { SearchView() }
                     .tabItem { Label("Hľadať", systemImage: "magnifyingglass") }
-                Stack { MineView() }
-                    .tabItem { Text("Moje") }
             }
 
             if player.loadingPath != nil {
-                ProgressView("Načítavam video…")
-                    .padding(48)
-                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24))
+                HStack(spacing: 24) {
+                    ProgressView()
+                    Text("Pripravujem video…").font(.headline)
+                }
+                .padding(.horizontal, 48).padding(.vertical, 32)
+                .glassPanel(cornerRadius: 40)
             }
         }
-        .preferredColorScheme(.light)
         .alert("Video", isPresented: Binding(get: { player.message != nil },
                                              set: { if !$0 { player.message = nil } })) {
             Button("OK", role: .cancel) {}
@@ -60,7 +68,7 @@ struct RootView: View {
     }
 }
 
-/// NavigationStack so spoločnými cieľmi navigácie.
+/// NavigationStack so spoločnými cieľmi navigácie; pozadie preberá z BackdropView.
 struct Stack<Content: View>: View {
     @ViewBuilder var content: Content
 

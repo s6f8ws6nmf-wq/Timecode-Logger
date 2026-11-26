@@ -8,8 +8,55 @@ struct ShowCard: Identifiable, Hashable, Codable {
     let title: String
     let info: String
     let image: String?
+    var logo: String? = nil
 
     var imageURL: URL? { image.flatMap { Net.url($0) } }
+
+    /// Odkaz priamo na video (napr. film), nie na stránku relácie.
+    var isVideo: Bool { path.split(separator: "/").count >= 2 }
+
+    var slug: String { path.split(separator: "/").first.map(String.init) ?? "" }
+
+    /// Obrázky od najkvalitnejšieho: veľký krajinkový (774×393), potom pôvodný.
+    var artwork: [URL] { Artwork.urls(slug: slug, extra: image) }
+
+    var asVideo: VideoItem {
+        VideoItem(path: path, title: title, showTitle: info, source: .from(logo: logo))
+    }
+}
+
+enum Artwork {
+    static func urls(slug: String, extra: String?) -> [URL] {
+        var out: [URL] = []
+        if !slug.isEmpty && !slug.hasPrefix("-") {
+            for s in ["\(slug).sk.jpg", "\(slug).cz.jpg"] {
+                if let u = Net.url("/images/movies_merged/" + s) { out.append(u) }
+            }
+        }
+        if let extra, let u = Net.url(HTML.unescapeJS(extra)), !out.contains(u) { out.append(u) }
+        if !slug.isEmpty, let u = Net.url("/images/movies/\(slug)_landscape.webp"), !out.contains(u) { out.append(u) }
+        return out
+    }
+}
+
+struct HeroItem: Identifiable, Hashable {
+    var id: String { video.path }
+    let video: VideoItem
+    let image: String?
+    var artwork: [URL] {
+        let slug = video.showPath.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        return Artwork.urls(slug: slug, extra: image)
+    }
+}
+
+struct Shelf: Identifiable, Hashable {
+    let id: String
+    let items: [ShowCard]
+}
+
+struct HomeFeed {
+    let hero: [HeroItem]
+    let shelves: [Shelf]
 }
 
 enum VideoSource: String, Codable, CaseIterable {
@@ -53,6 +100,10 @@ struct VideoItem: Identifiable, Hashable, Codable {
     let showTitle: String
     let source: VideoSource
     var note: String = ""
+
+    var artwork: [URL] {
+        Artwork.urls(slug: showPath.trimmingCharacters(in: CharacterSet(charactersIn: "/")), extra: nil)
+    }
 
     /// Cesta relácie („/farma“) z cesty epizódy („/farma/epizoda-1“).
     var showPath: String {
@@ -110,6 +161,52 @@ enum Site {
 
     static let letters = ["a", "b", "c", "ch", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
                           "n", "o", "p", "r", "s", "t", "u", "v", "w", "x", "z"]
+
+    /// Domovská stránka: pás najnovších epizód + police („Dnes najpozeranejšie seriály“, „Celé filmy“…).
+    static func home() async throws -> HomeFeed {
+        let html = try await Net.page("/")
+        var hero: [HeroItem] = []
+        if let start = html.range(of: "ml_archives\">") {
+            var block = String(html[start.upperBound...])
+            if let end = block.range(of: "ml_list_title") { block = String(block[..<end.lowerBound]) }
+            for m in block.components(separatedBy: "<div class=\"ml_movie\">").dropFirst() {
+                guard let path = HTML.first("href=\"(/[^\"#]+)\"", in: m) else { continue }
+                let img = HTML.first("url\\('([^']+)'\\)", in: m)
+                let a = HTML.first("<div class=\"cdiv\">\\s*<a[^>]*>(.*?)</a>", in: m) ?? ""
+                let parts = a.components(separatedBy: "<br")
+                let show = HTML.text(parts.first ?? "")
+                let ep = parts.count > 1 ? HTML.text("<br" + parts.dropFirst().joined(separator: "<br")) : ""
+                let logo = HTML.first("logo/([^\"]+)\"", in: m)
+                hero.append(HeroItem(video: VideoItem(path: path, title: ep.isEmpty ? show : ep, showTitle: show,
+                                                      source: .from(logo: logo)), image: img))
+            }
+        }
+        var shelves: [Shelf] = []
+        let skip = ["moje obľúbené", "hrajú v kinách", "seriály"]
+        for sec in html.components(separatedBy: "<h2 class=\"ml_list_title\">").dropFirst() {
+            let title = HTML.text(HTML.first("^\\s*<a[^>]*>(.*?)</a>", in: sec) ?? HTML.first("^(.*?)</h2>", in: sec) ?? "")
+            guard !title.isEmpty, !skip.contains(title.lowercased()) else { continue }
+            var cards: [ShowCard] = []
+            var seen = Set<String>()
+            for m in sec.components(separatedBy: "<div class=\"ml_movie\">").dropFirst() {
+                guard let path = HTML.first("class=\"ml_img\"[^>]*href=\"(/[^\"#]+)\"", in: m)
+                        ?? HTML.first("href=\"(/[^\"#]+)\"[^>]*class=\"ml_img\"", in: m)
+                        ?? HTML.first("href=\"(/[^\"#]+)\"", in: m),
+                      !seen.contains(path) else { continue }
+                seen.insert(path)
+                let img = HTML.first("url\\('([^']+)'\\)", in: m)
+                let titleHTML = HTML.first("<div class=\"ml_title\">.*?<a[^>]*>(.*?)</a>", in: m) ?? ""
+                let small = HTML.text(HTML.first("<small>(.*?)</small>", in: titleHTML) ?? "")
+                let name = HTML.text(HTML.remove("<small>.*?</small>", from: titleHTML))
+                guard !name.isEmpty else { continue }
+                cards.append(ShowCard(path: path, title: name,
+                                      info: small.trimmingCharacters(in: CharacterSet(charactersIn: "() ")),
+                                      image: img, logo: HTML.first("logo/([^\"]+)\"", in: m)))
+            }
+            if !cards.isEmpty { shelves.append(Shelf(id: title, items: cards)) }
+        }
+        return HomeFeed(hero: hero, shelves: shelves)
+    }
 
     /// Karty relácií na stránkach so zoznamom (stanica, A–Z, žánre…).
     static func shows(at path: String) async throws -> [ShowCard] {
