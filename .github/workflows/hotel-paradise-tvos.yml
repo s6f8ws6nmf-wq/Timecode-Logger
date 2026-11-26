@@ -1,0 +1,54 @@
+name: Hotel Paradise – tvOS IPA
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "HotelParadiseTV/**"
+      - ".github/workflows/hotel-paradise-tvos.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: XcodeGen
+        run: |
+          brew install xcodegen
+          cd HotelParadiseTV && xcodegen generate
+
+      - name: Build (bez podpisu)
+        run: |
+          cd HotelParadiseTV
+          xcodebuild -project HotelParadiseTV.xcodeproj -scheme HotelParadiseTV \
+            -configuration Release -sdk appletvos -destination 'generic/platform=tvOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+
+      - name: Zabaliť IPA
+        run: |
+          cd HotelParadiseTV
+          APP=$(find build/Build/Products/Release-appletvos -maxdepth 1 -name '*.app' | head -1)
+          rm -rf Payload && mkdir Payload && cp -R "$APP" Payload/
+          rm -f HotelParadise-tvOS-unsigned.ipa
+          zip -qry HotelParadise-tvOS-unsigned.ipa Payload
+          ls -la HotelParadise-tvOS-unsigned.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HotelParadise-tvOS-unsigned
+          path: HotelParadiseTV/HotelParadise-tvOS-unsigned.ipa
+
+      - name: Uložiť IPA do repozitára (download/)
+        run: |
+          mkdir -p download
+          cp HotelParadiseTV/HotelParadise-tvOS-unsigned.ipa download/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add download/HotelParadise-tvOS-unsigned.ipa
+          git diff --cached --quiet || git commit -m "Hotel Paradise tvOS: nové IPA [skip ci]"
+          git push
