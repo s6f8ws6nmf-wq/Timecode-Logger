@@ -36,21 +36,27 @@ struct RootView: View {
     @EnvironmentObject private var library: Library
     @AppStorage(AppLanguage.storageKey) private var lang = AppLanguage.sk.rawValue
     @State private var installWarning: String?
+    @State private var tab = "home"
 
     var body: some View {
         ZStack {
             BackdropView()
-            TabView {
+            TabView(selection: $tab) {
                 Stack { HomeView() }
                     .tabItem { Label(tr("Domov"), systemImage: "house.fill") }
+                    .tag("home")
                 Stack { AZView() }
                     .tabItem { Label(tr("Relácie"), systemImage: "textformat") }
+                    .tag("shows")
                 Stack { LiveView() }
                     .tabItem { Label(tr("Live"), systemImage: "dot.radiowaves.left.and.right") }
+                    .tag("live")
                 Stack { SearchView() }
                     .tabItem { Label(tr("Hľadať"), systemImage: "magnifyingglass") }
+                    .tag("search")
                 Stack { SettingsView() }
                     .tabItem { Label(tr("Nastavenia"), systemImage: "gearshape.fill") }
+                    .tag("settings")
             }
             // zmena jazyka prekreslí celé rozhranie
             .id(lang)
@@ -65,6 +71,12 @@ struct RootView: View {
             }
         }
         .onOpenURL { url in
+            // tvarchiv://tab/<live|shows|search|settings> z Top Shelf
+            if url.host == "tab" {
+                let t = url.lastPathComponent
+                if ["home", "shows", "live", "search", "settings"].contains(t) { tab = t }
+                return
+            }
             guard let item = library.item(forDeepLink: url) else { return }
             // krátka pauza, aby bolo okno pripravené aj pri studenom štarte z Top Shelf
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { player.play(item) }

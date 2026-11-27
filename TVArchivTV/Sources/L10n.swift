@@ -136,6 +136,12 @@ enum L10n {
             "This video is on YouTube. Please install the YouTube app on Apple TV (video ID: %@).",
         "Len s predplatným": "Subscription only",
         "Bez videí": "No videos",
+        "funguje": "working",
+        "nefunguje (Sideloadly ju nezachoval)": "not working (not kept by Sideloadly)",
+        "Posledný beh doplnku": "Last extension run",
+        "zatiaľ nebežal (alebo nevidno – App Group)": "not run yet (or not visible – App Group)",
+        "Top Shelf sa zobrazí, keď je ikona aplikácie v hornom rade a prejdete na ňu. Po inštalácii môže trvať pár minút, kým ho tvOS prvýkrát načíta.":
+            "Top Shelf appears when the app icon is in the top row and focused. After installing it may take a few minutes until tvOS loads it for the first time.",
         "Platnosť aplikácie dnes vyprší. Nainštalujte ju znovu cez Sideloadly.": "The app expires today. Please reinstall it with Sideloadly.",
         "O 1 deň bude potrebné aplikáciu nainštalovať znovu cez Sideloadly.": "In 1 day you will need to reinstall the app with Sideloadly.",
         "Platnosť inštalácie": "Installation valid for",

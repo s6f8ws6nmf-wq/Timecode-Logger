@@ -49,6 +49,14 @@ struct SettingsView: View {
                         .font(.caption).foregroundStyle(.secondary)
                 }
 
+                section("Top Shelf") {
+                    row("App Group", topShelfGroupOK ? tr("funguje") : tr("nefunguje (Sideloadly ju nezachoval)"))
+                    row(tr("Posledný beh doplnku"), topShelfStatus)
+                    Text(tr("Top Shelf sa zobrazí, keď je ikona aplikácie v hornom rade a prejdete na ňu. Po inštalácii môže trvať pár minút, kým ho tvOS prvýkrát načíta."))
+                        .font(.caption).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
                 section(tr("Údaje")) {
                     HStack(spacing: 16) {
                         Button(tr("Vymazať históriu pozerania")) {
@@ -67,6 +75,20 @@ struct SettingsView: View {
             .padding(.horizontal, 80)
             .padding(.bottom, 80)
         }
+    }
+
+    private var topShelfGroupOK: Bool {
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: TopShelfStore.appGroup) != nil
+    }
+
+    private var topShelfStatus: String {
+        guard topShelfGroupOK,
+              let st = UserDefaults(suiteName: TopShelfStore.appGroup)?.dictionary(forKey: "topshelf.status"),
+              let date = st["date"] as? Date else { return tr("zatiaľ nebežal (alebo nevidno – App Group)") }
+        let f = DateFormatter()
+        f.dateStyle = .short
+        f.timeStyle = .short
+        return f.string(from: date) + " · " + (st["text"] as? String ?? "")
     }
 
     private var validityText: String {
