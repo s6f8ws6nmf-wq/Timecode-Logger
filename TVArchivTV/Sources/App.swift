@@ -41,14 +41,12 @@ struct RootView: View {
             TabView {
                 Stack { HomeView() }
                     .tabItem { Label("Domov", systemImage: "house.fill") }
-                Stack { LatestView() }
-                    .tabItem { Label("Najnovšie", systemImage: "clock.fill") }
-                Stack { ChannelsView() }
-                    .tabItem { Label("Stanice", systemImage: "tv.fill") }
                 Stack { AZView() }
                     .tabItem { Label("A – Z", systemImage: "textformat") }
-                Stack { MineView() }
-                    .tabItem { Label("Moje", systemImage: "person.crop.circle") }
+                Stack { LiveView() }
+                    .tabItem { Label("Live", systemImage: "dot.radiowaves.left.and.right") }
+                Stack { WebcamsView() }
+                    .tabItem { Label("Webkamery", systemImage: "web.camera") }
                 Stack { SearchView() }
                     .tabItem { Label("Hľadať", systemImage: "magnifyingglass") }
             }

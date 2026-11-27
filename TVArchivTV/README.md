@@ -10,12 +10,14 @@ Vzhľad je ako aplikácia Apple TV: tmavé rozhranie, veľký pás najnovších 
 a pozadie, ktoré sa mení podľa vybranej položky. Na tvOS 26 používa **Liquid Glass** (sklenené tlačidlá,
 panely a lištu kariet), na starších systémoch matný materiál.
 
-- **Domov** – najnovšie epizódy, Pokračovať v pozeraní, Obľúbené, Dnes najpozeranejšie seriály, Celé filmy
-- **Najnovšie** – posledné pridané videá zo stránky
-- **Stanice** – JOJ, Markíza, STVR, ČT, Nova, TV Lux… → relácie stanice
+- **Domov** – najnovšie epizódy, Pokračovať v pozeraní, Obľúbené relácie a webkamery, Najnovšie videá,
+  Dnes najpozeranejšie seriály, Celé filmy
 - **A – Z** – všetky relácie podľa písmen
+- **Live** – živé vysielanie: STVR (Jednotka, Dvojka, :24, Šport, NR SR), TV Lux, ČT (ČT1, ČT2, ČT24, ČT sport, ČT :D, ČT art)
+- **Webkamery** – Slovensko (Tatry priamo z vt.sk, hory, mestá), Česko, Európa, USA, Ázia, príroda;
+  výber okruhu, hľadanie, obľúbené (podržať stredné tlačidlo). Kamery z YouTube sa otvoria v aplikácii YouTube.
+  Zoznam je v `Resources/webcams.json` a aplikácia si ho načíta aj z GitHubu – dá sa aktualizovať bez novej inštalácie.
 - **Hľadať** – rovnaké vyhľadávanie ako na stránke
-- **Moje** – rozpozerané videá (pokračuje tam, kde ste skončili), obľúbené relácie, pozreté
 - prehrávač: menu **Obraz** v lište – *Roztiahnuť na 16:9* pre videá stlačené na 4:3 (pamätá sa pre každú reláciu),
   *Vyplniť obrazovku*, *Pôvodný pomer strán*; menu **Synchronizácia zvuku** – posun zvuku po 50 ms
   alebo predvoľby ±100 až ±1000 ms (tiež sa pamätá pre každú reláciu)

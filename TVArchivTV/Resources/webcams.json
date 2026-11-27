@@ -1,0 +1,407 @@
+{
+ "version": 1,
+ "updated": "2026-11-27",
+ "groups": [
+  {
+   "id": "sk-tatry",
+   "title": "Vysoké Tatry – priamy prenos",
+   "region": "Slovensko",
+   "cams": [
+    {
+     "name": "Lomnický štít 2634 m",
+     "place": "Vysoké Tatry",
+     "hls": "https://stream2.profi-net.sk:443/tmr//STREAM23.stream/playlist.m3u8"
+    },
+    {
+     "name": "Lomnické sedlo 2190 m",
+     "place": "Vysoké Tatry",
+     "hls": "https://stream2.profi-net.sk:443/tmr//STREAM44.stream/playlist.m3u8"
+    },
+    {
+     "name": "Solisko 1814 m",
+     "place": "Štrbské Pleso",
+     "hls": "https://stream2.profi-net.sk:443/tmr//STREAM31.stream/playlist.m3u8"
+    },
+    {
+     "name": "Skalnaté pleso I 1751 m",
+     "place": "Vysoké Tatry",
+     "hls": "https://stream2.profi-net.sk:443/tmr//STREAM30.stream/playlist.m3u8"
+    },
+    {
+     "name": "Skalnaté pleso II 1751 m",
+     "place": "Vysoké Tatry",
+     "hls": "https://stream2.profi-net.sk:443/tmr//STREAM29.stream/playlist.m3u8"
+    },
+    {
+     "name": "Hrebienok I 1285 m",
+     "place": "Starý Smokovec",
+     "hls": "https://stream2.profi-net.sk:443/tmr//STREAM14.stream/playlist.m3u8"
+    },
+    {
+     "name": "Hrebienok II 1285 m",
+     "place": "Starý Smokovec",
+     "hls": "https://stream2.profi-net.sk:443/tmr//STREAM15.stream/playlist.m3u8"
+    },
+    {
+     "name": "Štart 1173 m",
+     "place": "Tatranská Lomnica",
+     "hls": "https://stream2.profi-net.sk:443/tmr//STREAM34.stream/playlist.m3u8"
+    },
+    {
+     "name": "Tatranská Lomnica 904 m",
+     "place": "Vysoké Tatry",
+     "hls": "https://stream2.profi-net.sk:443/tmr//STREAM33.stream/playlist.m3u8"
+    }
+   ]
+  },
+  {
+   "id": "sk-hory",
+   "title": "Slovensko – hory a strediská",
+   "region": "Slovensko",
+   "cams": [
+    {
+     "name": "Slovensko – panorámy 24/7",
+     "place": "feratel",
+     "youtube": "6V39eDpTyas"
+    },
+    {
+     "name": "Štrbské Pleso",
+     "place": "Hotel Crocus",
+     "youtube": "5QY49cON2yg"
+    },
+    {
+     "name": "Litmanová",
+     "place": "Litmanová Resort",
+     "youtube": "wEx7hPEWQkw"
+    },
+    {
+     "name": "Oravice",
+     "place": "Meander Oravice",
+     "youtube": "a2NzXPcX8hA"
+    },
+    {
+     "name": "Levoča – Nordic Centrum",
+     "place": "Levoča",
+     "youtube": "GENf8SJM_vY"
+    },
+    {
+     "name": "Švošov – kostol",
+     "place": "Fara Švošov",
+     "youtube": "aZlEdtngres"
+    }
+   ]
+  },
+  {
+   "id": "sk-mesta",
+   "title": "Slovensko – mestá",
+   "region": "Slovensko",
+   "cams": [
+    {
+     "name": "Bratislavský hrad",
+     "place": "eMeteo.sk",
+     "youtube": "Kycpb3_xCeo"
+    },
+    {
+     "name": "Bratislava – panoráma",
+     "place": "eMeteo.sk",
+     "youtube": "PZMvWDB6O0o"
+    },
+    {
+     "name": "Bratislava – nové centrum",
+     "place": "Bratislava",
+     "youtube": "5bpb3hDNDFk"
+    },
+    {
+     "name": "Bratislava – Vajnory, Malé Karpaty",
+     "place": "eMeteo.sk",
+     "youtube": "aRpBP7MaZzg"
+    },
+    {
+     "name": "Trenčín – Mierové námestie",
+     "place": "Mesto Trenčín",
+     "youtube": "9cB9TOdbI6A"
+    },
+    {
+     "name": "Trnava – Univerzitné námestie",
+     "place": "Mesto Trnava",
+     "youtube": "5Li5DaNk-00"
+    },
+    {
+     "name": "Modra #1",
+     "place": "Mesto Modra",
+     "youtube": "W3QR_9GQkG8"
+    },
+    {
+     "name": "Modra #2",
+     "place": "Mesto Modra",
+     "youtube": "_osIwrN7XLM"
+    },
+    {
+     "name": "Kežmarok – panoráma",
+     "place": "TV Kežmarok",
+     "youtube": "dKId6oX2c98"
+    }
+   ]
+  },
+  {
+   "id": "cz",
+   "title": "Česko",
+   "region": "Česko",
+   "cams": [
+    {
+     "name": "Praha – hlavné nádražie",
+     "place": "SlowTV",
+     "youtube": "tmlE1ct0cYk"
+    },
+    {
+     "name": "Praha – letisko Václava Havla",
+     "place": "SlowTV",
+     "youtube": "Deo_lcwn8lk"
+    },
+    {
+     "name": "Ústí nad Orlicí – vlaky",
+     "place": "SlowTV",
+     "youtube": "gRdT0HnAd4I"
+    },
+    {
+     "name": "Cheb – námestie",
+     "place": "Mesto Cheb",
+     "youtube": "n2VD7ePyYM0"
+    }
+   ]
+  },
+  {
+   "id": "eu",
+   "title": "Európa",
+   "region": "Európa",
+   "cams": [
+    {
+     "name": "Benátky – Bazén sv. Marka",
+     "place": "Taliansko",
+     "youtube": "ASqGNET31VY"
+    },
+    {
+     "name": "Benátky – Canal Grande",
+     "place": "Taliansko",
+     "youtube": "r8N6IsoIkTk"
+    },
+    {
+     "name": "Benátky – rolling cam",
+     "place": "Taliansko",
+     "youtube": "a1mcaV3Sf9U"
+    },
+    {
+     "name": "Paríž – Eiffelova veža",
+     "place": "Francúzsko",
+     "youtube": "YkKGantlWH0"
+    },
+    {
+     "name": "Paríž – Sacré-Cœur",
+     "place": "Francúzsko",
+     "youtube": "-xzg3wujOVM"
+    },
+    {
+     "name": "Londýn – Abbey Road",
+     "place": "Anglicko",
+     "youtube": "zMCea32gpmg"
+    },
+    {
+     "name": "Mallorca",
+     "place": "Španielsko",
+     "youtube": "jtdyLykT_XY"
+    },
+    {
+     "name": "Tamariu",
+     "place": "Španielsko",
+     "youtube": "wiVzU1mcCTA"
+    },
+    {
+     "name": "Primošten",
+     "place": "Chorvátsko",
+     "youtube": "upOiG0CMlnw"
+    },
+    {
+     "name": "Rogoznica",
+     "place": "Chorvátsko",
+     "youtube": "iSbn8x3IUhs"
+    },
+    {
+     "name": "Rakúsko – panorámy 24/7",
+     "place": "feratel",
+     "youtube": "NIuO6hrFTrg"
+    },
+    {
+     "name": "Švajčiarske Alpy 24/7",
+     "place": "feratel",
+     "youtube": "enYFXf8u7Lc"
+    },
+    {
+     "name": "Lyžiarske strediská 24/7",
+     "place": "feratel",
+     "youtube": "NvDIicBR1s4"
+    },
+    {
+     "name": "Poľské hory – Tatry, Krkonoše",
+     "place": "WebCamera.pl",
+     "youtube": "W3Y2T66t--Y"
+    },
+    {
+     "name": "Európa – 280 miest",
+     "place": "Cam Nomad",
+     "youtube": "zmv6NPLg91U"
+    }
+   ]
+  },
+  {
+   "id": "usa",
+   "title": "USA",
+   "region": "USA",
+   "cams": [
+    {
+     "name": "Times Square 4K",
+     "place": "New York",
+     "youtube": "ZxCeWQ3Lcig"
+    },
+    {
+     "name": "Times Square Crossroads",
+     "place": "New York",
+     "youtube": "KHy_n-EMWY8"
+    },
+    {
+     "name": "Socha slobody",
+     "place": "New York",
+     "youtube": "o5Ie_LpZ9uk"
+    },
+    {
+     "name": "Brooklynský most",
+     "place": "New York",
+     "youtube": "tErYxn2UM5Y"
+    },
+    {
+     "name": "World Trade Center",
+     "place": "New York",
+     "youtube": "5C9oM7C2Q9k"
+    },
+    {
+     "name": "Chicago – Skydeck",
+     "place": "Chicago",
+     "youtube": "W9ghgZD6Ugw"
+    },
+    {
+     "name": "Washingtonov monument",
+     "place": "Washington, D.C.",
+     "youtube": "mG2gAWY_Guw"
+    },
+    {
+     "name": "New Orleans",
+     "place": "Louisiana",
+     "youtube": "xqdukYhcGEU"
+    },
+    {
+     "name": "Jackson Hole – námestie",
+     "place": "Wyoming",
+     "youtube": "B_waF26In9o"
+    },
+    {
+     "name": "Grand Teton",
+     "place": "Wyoming",
+     "youtube": "j-0fhrHzEiM"
+    },
+    {
+     "name": "Venice Beach",
+     "place": "Los Angeles",
+     "youtube": "EO_1LWqsCNE"
+    },
+    {
+     "name": "Kajmanské ostrovy",
+     "place": "Karibik",
+     "youtube": "YeEMPcYCbgQ"
+    }
+   ]
+  },
+  {
+   "id": "asia",
+   "title": "Ázia",
+   "region": "Ázia",
+   "cams": [
+    {
+     "name": "Tokio – Shibuya Crossing",
+     "place": "FNN",
+     "youtube": "dfVK7ld38Ys"
+    },
+    {
+     "name": "Tokio – Shibuya",
+     "place": "ANN",
+     "youtube": "5B4LmH4JbnY"
+    },
+    {
+     "name": "Tokio – Tokijský záliv",
+     "place": "Tokyo Views",
+     "youtube": "_k-5U7IeK8g"
+    },
+    {
+     "name": "Tokio – Shinjuku",
+     "place": "Japonsko",
+     "youtube": "6dp-bvQ7RWo"
+    },
+    {
+     "name": "Tokio – ulice 24/7",
+     "place": "Japan Walk",
+     "youtube": "L6wO1-U2RTY"
+    }
+   ]
+  },
+  {
+   "id": "nature",
+   "title": "Príroda a zvieratá",
+   "region": "Príroda",
+   "cams": [
+    {
+     "name": "Medvede – Brooks Falls",
+     "place": "Aljaška",
+     "youtube": "J7ZrIDvqlic"
+    },
+    {
+     "name": "Slony – Tembe",
+     "place": "Južná Afrika",
+     "youtube": "0P_LBKqVbfs"
+    },
+    {
+     "name": "Tropický útes",
+     "place": "explore.org",
+     "youtube": "DHUnz4dyb54"
+    },
+    {
+     "name": "Kapustňáky pod vodou",
+     "place": "Florida",
+     "youtube": "Fz6sl9YJZE0"
+    },
+    {
+     "name": "Orly – Decorah",
+     "place": "Iowa",
+     "youtube": "GGIE1E-kaMQ"
+    },
+    {
+     "name": "Vlky",
+     "place": "Minnesota",
+     "youtube": "5e4lsEe4Vew"
+    },
+    {
+     "name": "Orol filipínsky – hniezdo",
+     "place": "Filipíny",
+     "youtube": "m20bKZNdi98"
+    },
+    {
+     "name": "Mačiatka",
+     "place": "explore.org",
+     "youtube": "OOT6YlOYgaU"
+    },
+    {
+     "name": "Zvieratá v snehu",
+     "place": "Michigan",
+     "youtube": "TPGY7UYzbKw"
+    }
+   ]
+  }
+ ]
+}

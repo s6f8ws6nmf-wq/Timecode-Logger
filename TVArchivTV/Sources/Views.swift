@@ -153,6 +153,7 @@ struct PageTitle: View {
 struct HomeView: View {
     @EnvironmentObject private var library: Library
     @State private var state: LoadState<HomeFeed> = .loading
+    @State private var latest: [VideoItem] = []
 
     var body: some View {
         ScrollView(.vertical) {
@@ -169,8 +170,18 @@ struct HomeView: View {
                         }
                     }
                     if !library.favorites.isEmpty {
-                        ShelfRow(title: "Obľúbené") {
+                        ShelfRow(title: "Obľúbené relácie") {
                             ForEach(library.favorites) { ShowTile(show: $0) }
+                        }
+                    }
+                    if !library.favoriteCams.isEmpty {
+                        ShelfRow(title: "Obľúbené webkamery") {
+                            ForEach(library.favoriteCams) { WebcamTile(cam: $0) }
+                        }
+                    }
+                    if !latest.isEmpty {
+                        ShelfRow(title: "Najnovšie videá") {
+                            ForEach(latest.prefix(30)) { VideoTile(item: $0) }
                         }
                     }
                     ForEach(feed.shelves) { shelf in
@@ -187,7 +198,9 @@ struct HomeView: View {
 
     private func load() async {
         state = .loading
+        async let latestTask = try? Site.latest()
         do { state = .loaded(try await Site.home()) } catch { state = .failed(error.localizedDescription) }
+        latest = await latestTask ?? []
     }
 }
 
