@@ -136,6 +136,9 @@ enum L10n {
             "This video is on YouTube. Please install the YouTube app on Apple TV (video ID: %@).",
         "Len s predplatným": "Subscription only",
         "Bez videí": "No videos",
+        "Zatiaľ nemáte nič v obľúbených.": "You have no favorites yet.",
+        "Reláciu pridáte tlačidlom ☆ Obľúbené na jej stránke, webkameru podržaním stredného tlačidla.":
+            "Add a show with the ☆ Favorites button on its page, a webcam by pressing and holding the center button.",
         "funguje": "working",
         "nefunguje (Sideloadly ju nezachoval)": "not working (not kept by Sideloadly)",
         "nepoužíva sa (bezplatný podpis ju nepodporuje)": "not used (not supported by free signing)",

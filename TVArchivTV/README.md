@@ -10,7 +10,7 @@ Vzhľad je ako aplikácia Apple TV: tmavé rozhranie, veľký pás najnovších 
 a pozadie, ktoré sa mení podľa vybranej položky. Na tvOS 26 používa **Liquid Glass** (sklenené tlačidlá,
 panely a lištu kariet), na starších systémoch matný materiál.
 
-Menu: **Domov · Relácie · Hľadať · Live · Nastavenia**. Aplikácia je po slovensky (predvolene) aj po anglicky.
+Menu: **Domov · Relácie · Hľadať · Obľúbené · Live · Nastavenia**. Aplikácia je po slovensky (predvolene) aj po anglicky.
 
 - **Domov** – najnovšie epizódy, Pokračovať v pozeraní, Obľúbené relácie a webkamery, Najnovšie videá,
   Dnes najpozeranejšie seriály, Celé filmy

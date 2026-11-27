@@ -51,6 +51,9 @@ struct RootView: View {
                 Stack { SearchView() }
                     .tabItem { Label(tr("Hľadať"), systemImage: "magnifyingglass") }
                     .tag("search")
+                Stack { FavoritesView() }
+                    .tabItem { Label(tr("Obľúbené"), systemImage: "star.fill") }
+                    .tag("favorites")
                 Stack { LiveView() }
                     .tabItem { Label(tr("Live"), systemImage: "dot.radiowaves.left.and.right") }
                     .tag("live")
@@ -74,7 +77,7 @@ struct RootView: View {
             // tvarchiv://tab/<live|shows|search|settings> z Top Shelf
             if url.host == "tab" {
                 let t = url.lastPathComponent
-                if ["home", "shows", "live", "search", "settings"].contains(t) { tab = t }
+                if ["home", "shows", "search", "favorites", "live", "settings"].contains(t) { tab = t }
                 return
             }
             guard let item = library.item(forDeepLink: url) else { return }
