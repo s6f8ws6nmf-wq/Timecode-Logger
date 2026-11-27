@@ -10,18 +10,24 @@ struct LiveView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 34) {
-                PageTitle(text: tr("Živé vysielanie")).padding(.horizontal, 80)
-                channels
+                // 1. webkamery
                 if let catalog {
-                    // americké televízie, letiská… (skupiny s "live": true)
+                    WebcamsSection(catalog: catalog)
+                } else {
+                    LoadingView()
+                }
+                // 2. živé TV stanice
+                Text(tr("Živé vysielanie")).font(.system(size: 52, weight: .bold))
+                    .padding(.horizontal, 80)
+                    .padding(.top, 30)
+                channels
+                // 3. americké televízie, letiská… (skupiny s "live": true)
+                if let catalog {
                     ForEach(catalog.liveGroups) { g in
                         ShelfRow(title: g.displayTitle) {
                             ForEach(g.cams) { WebcamTile(cam: $0) }
                         }
                     }
-                    WebcamsSection(catalog: catalog)
-                } else {
-                    LoadingView()
                 }
             }
             .padding(.bottom, 80)
@@ -148,7 +154,7 @@ struct WebcamsSection: View {
                     .frame(width: 520)
             }
             .padding(.horizontal, 80)
-            .padding(.top, 30)
+            .padding(.top, 20)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 GlassGroup(spacing: 14) {

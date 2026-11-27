@@ -46,7 +46,7 @@ struct RootView: View {
                     .tabItem { Label(tr("Domov"), systemImage: "house.fill") }
                     .tag("home")
                 Stack { AZView() }
-                    .tabItem { Label(tr("Relácie"), systemImage: "textformat") }
+                    .tabItem { Label(tr("Relácie"), systemImage: "film.stack") }
                     .tag("shows")
                 Stack { LiveView() }
                     .tabItem { Label(tr("Live"), systemImage: "dot.radiowaves.left.and.right") }
