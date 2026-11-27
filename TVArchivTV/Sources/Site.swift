@@ -274,9 +274,15 @@ enum Site {
         guard let obj = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { return ([], []) }
         let shows: [ShowCard] = (obj["results"] as? [[String: Any]] ?? []).compactMap { r in
             guard let path = r["url"] as? String else { return nil }
-            let nameHTML = HTML.remove("<div class=\"tooltip\">.*?</div>", from: r["name"] as? String ?? "")
-            let title = HTML.text(HTML.first("<span style=\"font-weight: 800;\">(.*?)</span>", in: nameHTML) ?? nameHTML)
-            let info = HTML.text(HTML.first("</span>\\s*\\(([^)]*)\\)", in: nameHTML) ?? "")
+            var nameHTML = HTML.remove("<div class=\"tooltip\">.*?</div>", from: r["name"] as? String ?? "")
+            nameHTML = HTML.remove("<span style=\"font-size[^\"]*\">.*?</span>", from: nameHTML)
+            let plain = HTML.text(nameHTML).trimmingCharacters(in: CharacterSet(charactersIn: " ;"))
+            var title = plain
+            var info = ""
+            if let m = HTML.all("^(.*?)\\s*\\(([^)]*)\\)", in: plain).first {
+                title = m[1]
+                info = m[2]
+            }
             return ShowCard(path: path, title: title, info: info, image: r["img"] as? String)
         }
         let videos: [VideoItem] = (obj["videos"] as? [[String: Any]] ?? []).compactMap { v in

@@ -545,7 +545,9 @@ struct ShowDetailView: View {
                         HStack(spacing: 14) {
                             ForEach(d.groups) { g in
                                 Button { group = g.id } label: {
-                                    Text("\(g.id)  \(g.items.count)").lineLimit(1).frame(maxWidth: 460)
+                                    Text("\(g.id.count > 36 ? String(g.id.prefix(34)) + "…" : g.id)  \(g.items.count)")
+                                        .lineLimit(1)
+                                        .fixedSize()
                                 }
                                     .glassButton(prominent: g.id == current.id)
                             }

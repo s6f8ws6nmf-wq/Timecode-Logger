@@ -125,10 +125,17 @@ enum HTML {
         return re.stringByReplacingMatches(in: s, range: NSRange(location: 0, length: (s as NSString).length), withTemplate: " ")
     }
 
+    /// Odstráni zhody bez náhrady medzerou.
+    static func strip(_ pattern: String, from s: String) -> String {
+        guard let re = regex(pattern) else { return s }
+        return re.stringByReplacingMatches(in: s, range: NSRange(location: 0, length: (s as NSString).length), withTemplate: "")
+    }
+
     /// HTML → čistý text.
     static func text(_ html: String) -> String {
         var s = remove("<script.*?</script>", from: html)
         s = remove("<br\\s*/?>", from: s)
+        s = strip("</?(?:span|b|strong|em|i|u|a|small|font|mark)\\b[^>]*>", from: s)
         s = remove("<[^>]+>", from: s)
         s = decodeEntities(s)
         return s.split(whereSeparator: { $0.isWhitespace }).joined(separator: " ")

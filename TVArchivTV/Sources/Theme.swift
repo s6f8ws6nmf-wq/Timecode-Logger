@@ -92,6 +92,7 @@ struct BackdropView: View {
                 .blur(radius: 40)
                 .opacity(0.55)
                 .scaleEffect(1.15)
+                .clipped()
                 .animation(.easeInOut(duration: 0.6), value: backdrop.urls)
             LinearGradient(colors: [.black.opacity(0.2), .black.opacity(0.75), .black],
                            startPoint: .top, endPoint: .bottom)
@@ -154,21 +155,28 @@ struct RemoteImage: View {
     @State private var image: UIImage?
 
     var body: some View {
-        ZStack {
-            if let image {
-                Image(uiImage: image).resizable().scaledToFill()
-                    .transition(.opacity)
-            } else if placeholder {
-                LinearGradient(colors: [Color(white: 0.22), Color(white: 0.12)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                Image(systemName: "play.tv")
-                    .font(.system(size: 54, weight: .light))
-                    .foregroundStyle(.white.opacity(0.25))
+        // Color.clear určí veľkosť (presne ponúknutý priestor); obrázok sa len prekryje a oreže,
+        // takže „scaledToFill“ nikdy nerozšíri rozloženie za okraj obrazovky.
+        Color.clear
+            .overlay {
+                if let image {
+                    Image(uiImage: image).resizable().scaledToFill()
+                        .transition(.opacity)
+                } else if placeholder {
+                    ZStack {
+                        LinearGradient(colors: [Color(white: 0.22), Color(white: 0.12)],
+                                       startPoint: .topLeading, endPoint: .bottomTrailing)
+                        Image(systemName: "play.tv")
+                            .font(.system(size: 54, weight: .light))
+                            .foregroundStyle(.white.opacity(0.25))
+                    }
+                }
             }
-        }
-        .task(id: urls) {
-            let img = await ImageStore.shared.firstImage(urls)
-            withAnimation(.easeOut(duration: 0.25)) { image = img }
-        }
+            .clipped()
+            .task(id: urls) {
+                let img = await ImageStore.shared.firstImage(urls)
+                withAnimation(.easeOut(duration: 0.25)) { image = img }
+            }
     }
 }
 
