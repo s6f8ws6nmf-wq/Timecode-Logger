@@ -31,6 +31,7 @@ struct ShowTile: View {
             }
             .frame(width: size.width, alignment: .leading)
         }
+        .task { availability.probe(show) }
     }
 
     private var art: some View {

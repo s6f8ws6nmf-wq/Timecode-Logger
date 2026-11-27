@@ -62,6 +62,35 @@ final class Availability: ObservableObject {
         show.hasVideo == false || emptyShows.contains(show.path)
     }
 
+    private var probedShows: Set<String> = Set(UserDefaults.standard.stringArray(forKey: "probedShows.v1") ?? [])
+    private var probeQueue: [ShowCard] = []
+    private var probing = 0
+
+    /// Na pozadí zistí, či má relácia videá (vyhľadávanie stránky vracia pri názve ikonku prehrávania).
+    func probe(_ show: ShowCard) {
+        guard show.hasVideo == nil, !show.isVideo, !probedShows.contains(show.path),
+              !probeQueue.contains(where: { $0.path == show.path }) else { return }
+        probeQueue.append(show)
+        pumpProbes()
+    }
+
+    private func pumpProbes() {
+        while probing < 3, !probeQueue.isEmpty {
+            let show = probeQueue.removeFirst()
+            probing += 1
+            Task {
+                if let r = try? await Site.search(show.title),
+                   let hit = r.shows.first(where: { $0.path == show.path }) {
+                    self.setShow(show.path, empty: hit.hasVideo == false)
+                }
+                self.probedShows.insert(show.path)
+                UserDefaults.standard.set(Array(self.probedShows), forKey: "probedShows.v1")
+                self.probing -= 1
+                self.pumpProbes()
+            }
+        }
+    }
+
     func setShow(_ path: String, empty: Bool) {
         guard emptyShows.contains(path) != empty else { return }
         if empty { emptyShows.insert(path) } else { emptyShows.remove(path) }
@@ -70,6 +99,8 @@ final class Availability: ObservableObject {
 
     func clear() {
         emptyShows = []
+        probedShows = []
+        UserDefaults.standard.removeObject(forKey: "probedShows.v1")
         UserDefaults.standard.removeObject(forKey: "emptyShows.v1")
         status = [:]
         stamps = [:]
