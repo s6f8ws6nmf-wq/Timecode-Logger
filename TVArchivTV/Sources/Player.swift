@@ -210,7 +210,7 @@ final class VideoPlayerController: AVPlayerViewController {
             let title = vms == 0 ? "Bez posunu" : (vms > 0 ? "Zvuk neskôr o \(vms) ms" : "Zvuk skôr o \(-vms) ms")
             return UIAction(title: title, state: vms == ms ? .on : .off) { [weak self] _ in self?.setAudioOffset(v) }
         }
-        return UIMenu(title: "Synchronizácia zvuku", subtitle: current, image: UIImage(systemName: "waveform"), children: [
+        return UIMenu(title: "Synchronizácia zvuku", subtitle: current, image: UIImage(systemName: "timer"), children: [
             UIMenu(title: "", options: .displayInline, children: step),
             UIMenu(title: "Predvoľby", image: UIImage(systemName: "list.bullet"), children: presets)
         ])
