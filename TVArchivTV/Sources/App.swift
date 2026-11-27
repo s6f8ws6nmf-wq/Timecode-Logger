@@ -48,12 +48,12 @@ struct RootView: View {
                 Stack { AZView() }
                     .tabItem { Label(tr("Relácie"), systemImage: "film.stack") }
                     .tag("shows")
-                Stack { LiveView() }
-                    .tabItem { Label(tr("Live"), systemImage: "dot.radiowaves.left.and.right") }
-                    .tag("live")
                 Stack { SearchView() }
                     .tabItem { Label(tr("Hľadať"), systemImage: "magnifyingglass") }
                     .tag("search")
+                Stack { LiveView() }
+                    .tabItem { Label(tr("Live"), systemImage: "dot.radiowaves.left.and.right") }
+                    .tag("live")
                 Stack { SettingsView() }
                     .tabItem { Label(tr("Nastavenia"), systemImage: "gearshape.fill") }
                     .tag("settings")
