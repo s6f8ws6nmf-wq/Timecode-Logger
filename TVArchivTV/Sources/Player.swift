@@ -244,6 +244,7 @@ final class VideoPlayerController: AVPlayerViewController {
         super.viewWillDisappear(animated)
         if isBeingDismissed {
             saveProgress(force: true)
+            library?.refreshTopShelf()
             player?.pause()
             if let timeObserver { player?.removeTimeObserver(timeObserver) }
             timeObserver = nil

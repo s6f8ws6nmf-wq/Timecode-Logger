@@ -48,6 +48,14 @@ jobs:
           APP=$(find build/Build/Products/Release-appletvos -maxdepth 1 -name '*.app' | head -1)
           echo "App: $APP"
           rm -rf Payload && mkdir Payload && cp -R "$APP" Payload/
+          # ad-hoc podpis s entitlements (App Group pre Top Shelf) – Sideloadly ich prevezme pri prepodpise
+          APPN=$(basename "$APP")
+          for EXT in "Payload/$APPN"/PlugIns/*.appex; do
+            [ -d "$EXT" ] && codesign -f -s - --entitlements TopShelf/TopShelf.entitlements "$EXT"
+          done
+          codesign -f -s - --entitlements Sources/TVArchiv.entitlements "Payload/$APPN"
+          codesign -d --entitlements - "Payload/$APPN" || true
+          ls "Payload/$APPN/PlugIns" || true
           rm -f TV-Archiv-tvOS.ipa
           zip -qry TV-Archiv-tvOS.ipa Payload
           ls -la TV-Archiv-tvOS.ipa

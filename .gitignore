@@ -6,3 +6,6 @@ TVArchivTV/*.xcodeproj
 TVArchivTV/build/
 TVArchivTV/Payload/
 TVArchivTV/*.ipa
+TVArchivTV/Sources/TVArchiv.entitlements
+TVArchivTV/TopShelf/TopShelf.entitlements
+TVArchivTV/TopShelf/Info.plist

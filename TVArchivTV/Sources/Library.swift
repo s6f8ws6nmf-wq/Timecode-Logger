@@ -50,6 +50,7 @@ final class Library: ObservableObject {
     func remove(_ path: String) {
         history.removeAll { $0.item.path == path }
         save()
+        refreshTopShelf()
     }
 
     func isFavorite(_ path: String) -> Bool { favorites.contains { $0.path == path } }
@@ -63,8 +64,26 @@ final class Library: ObservableObject {
         if let d = try? JSONEncoder().encode(favorites) { defaults.set(d, forKey: favoritesKey) }
     }
 
+    private var lastShelfUpdate = Date.distantPast
+
     private func save() {
         if let d = try? JSONEncoder().encode(history) { defaults.set(d, forKey: historyKey) }
+        // Top Shelf netreba obnovovať pri každom zázname pozície
+        if Date().timeIntervalSince(lastShelfUpdate) > 30 { refreshTopShelf() }
+    }
+
+    func refreshTopShelf() {
+        lastShelfUpdate = Date()
+        TopShelfStore.update(history: history)
+    }
+
+    /// Spustenie videa z Top Shelf (tvarchiv://play?path=/relacia/epizoda).
+    func item(forDeepLink url: URL) -> VideoItem? {
+        guard url.scheme == "tvarchiv",
+              let path = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                .queryItems?.first(where: { $0.name == "path" })?.value else { return nil }
+        if let e = entry(for: path) { return e.item }
+        return VideoItem(path: path, title: "", showTitle: "", source: .other)
     }
 }
 

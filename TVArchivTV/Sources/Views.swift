@@ -555,8 +555,9 @@ struct ShowDetailView: View {
                 }
                 .scrollClipDisabled()
 
-                LazyVStack(alignment: .leading, spacing: 18) {
-                    ForEach(current.items) { EpisodeRow(item: $0) }
+                LazyVGrid(columns: Array(repeating: GridItem(.fixed(EpisodeTile.side), spacing: 40), count: 5),
+                          alignment: .leading, spacing: 44) {
+                    ForEach(current.items) { EpisodeTile(item: $0) }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             } else {
@@ -581,6 +582,64 @@ struct ShowDetailView: View {
     private func load() async {
         state = .loading
         do { state = .loaded(try await Site.detail(of: show)) } catch { state = .failed(error.localizedDescription) }
+    }
+}
+
+/// Štvorcová dlaždica epizódy: obrázok relácie, číslo/názov epizódy, dátum, stav pozerania.
+struct EpisodeTile: View {
+    static let side: CGFloat = 300
+    @EnvironmentObject private var player: PlayerCenter
+    @EnvironmentObject private var library: Library
+    let item: VideoItem
+
+    var body: some View {
+        let entry = library.entry(for: item.path)
+        Button { player.play(item) } label: {
+            ZStack {
+                RemoteImage(urls: item.artwork)
+                    .frame(width: Self.side, height: Self.side)
+                    .clipped()
+                    .blur(radius: 6)
+                    .overlay(Color.black.opacity(0.45))
+                VStack(spacing: 10) {
+                    HStack {
+                        if entry?.finished == true {
+                            Image(systemName: "checkmark.circle.fill").font(.title3).foregroundStyle(.green)
+                        } else if !item.source.playable {
+                            Image(systemName: "lock.fill").font(.title3)
+                        } else if item.source == .youtube {
+                            Image(systemName: "play.rectangle.fill").font(.title3)
+                        }
+                        Spacer()
+                        if player.loadingPath == item.path { ProgressView() }
+                    }
+                    Spacer(minLength: 0)
+                    Text(item.shortTitle)
+                        .font(.system(size: item.shortTitle.count <= 6 ? 54 : 28, weight: .bold))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(4)
+                        .minimumScaleFactor(0.6)
+                    if let d = item.dateText {
+                        Text(d).font(.callout.weight(.medium)).foregroundStyle(.white.opacity(0.8))
+                    }
+                    Spacer(minLength: 0)
+                    if let entry, entry.fraction > 0.01, !entry.finished {
+                        ProgressView(value: entry.fraction).tint(.white)
+                    } else if !item.source.name.isEmpty {
+                        Text(item.source.name).font(.caption2.weight(.semibold)).foregroundStyle(.white.opacity(0.7))
+                    }
+                }
+                .foregroundStyle(.white)
+                .padding(20)
+                .frame(width: Self.side, height: Self.side)
+            }
+            .frame(width: Self.side, height: Self.side)
+        }
+        .buttonStyle(.card)
+        .contextMenu {
+            Button("Prehrať od začiatku") { player.play(item, fromStart: true) }
+            if entry != nil { Button("Odstrániť z histórie", role: .destructive) { library.remove(item.path) } }
+        }
     }
 }
 

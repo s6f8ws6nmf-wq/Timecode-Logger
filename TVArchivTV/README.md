@@ -19,7 +19,10 @@ panely a lištu kariet), na starších systémoch matný materiál.
 - prehrávač: menu **Obraz** v lište – *Roztiahnuť na 16:9* pre videá stlačené na 4:3 (pamätá sa pre každú reláciu),
   *Vyplniť obrazovku*, *Pôvodný pomer strán*; menu **Synchronizácia zvuku** – posun zvuku po 50 ms
   alebo predvoľby ±100 až ±1000 ms (tiež sa pamätá pre každú reláciu)
-- detail relácie: popis, skupiny (Archív, Bonusy, Videá…), zoznam epizód
+- **Top Shelf** (horná lišta Apple TV pri ikone aplikácie): *Pokračovať v pozeraní* ako Netflix – kliknutím sa video
+  hneď spustí. Funguje cez App Group `group.local.tvarchiv.player`; ak ju podpisovací nástroj nepodporí,
+  zobrazí sa len obrázok bez textu.
+- detail relácie: epizódy ako štvorcové dlaždice, popis, skupiny (Archív, Bonusy, Videá…), zoznam epizód
 
 ## Zdroje videí
 

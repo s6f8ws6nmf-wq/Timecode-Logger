@@ -31,6 +31,7 @@ enum Route: Hashable {
 
 struct RootView: View {
     @EnvironmentObject private var player: PlayerCenter
+    @EnvironmentObject private var library: Library
 
     var body: some View {
         ZStack {
@@ -59,6 +60,12 @@ struct RootView: View {
                 .glassPanel(cornerRadius: 40)
             }
         }
+        .onOpenURL { url in
+            guard let item = library.item(forDeepLink: url) else { return }
+            // krátka pauza, aby bolo okno pripravené aj pri studenom štarte z Top Shelf
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { player.play(item) }
+        }
+        .onAppear { library.refreshTopShelf() }
         .alert("Video", isPresented: Binding(get: { player.message != nil },
                                              set: { if !$0 { player.message = nil } })) {
             Button("OK", role: .cancel) {}

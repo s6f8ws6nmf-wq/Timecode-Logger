@@ -105,6 +105,18 @@ struct VideoItem: Identifiable, Hashable, Codable {
         Artwork.urls(slug: showPath.trimmingCharacters(in: CharacterSet(charactersIn: "/")), extra: nil)
     }
 
+    /// Dátum na konci názvu, napr. „E7 (13.03.2012)“ → „13.03.2012“.
+    var dateText: String? {
+        HTML.first("\\((\\d{1,2}\\.\\s?\\d{1,2}\\.\\s?\\d{4})\\)\\s*$", in: title)
+    }
+
+    /// Názov bez dátumu na konci.
+    var shortTitle: String {
+        let t = HTML.remove("\\(\\d{1,2}\\.\\s?\\d{1,2}\\.\\s?\\d{4}\\)\\s*$", from: title)
+            .trimmingCharacters(in: .whitespaces)
+        return t.isEmpty ? title : t
+    }
+
     /// Cesta relácie („/farma“) z cesty epizódy („/farma/epizoda-1“).
     var showPath: String {
         let parts = path.split(separator: "/", omittingEmptySubsequences: true)

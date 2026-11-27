@@ -6,8 +6,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "3.2.0"
-    CURRENT_PROJECT_VERSION: "5"
+    MARKETING_VERSION: "3.3.0"
+    CURRENT_PROJECT_VERSION: "6"
 targets:
   TVArchivTV:
     type: application
@@ -15,6 +15,13 @@ targets:
     sources:
       - Sources
       - Resources
+    dependencies:
+      - target: TopShelf
+    entitlements:
+      path: Sources/TVArchiv.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.local.tvarchiv.player
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: local.tvarchiv.player
@@ -34,3 +41,31 @@ targets:
         UILaunchStoryboardName: LaunchScreen
         UIRequiredDeviceCapabilities: [arm64]
         LSApplicationQueriesSchemes: [youtube]
+        CFBundleURLTypes:
+          - CFBundleURLName: local.tvarchiv.player
+            CFBundleURLSchemes: [tvarchiv]
+  TopShelf:
+    type: tv-app-extension
+    platform: tvOS
+    sources:
+      - TopShelf
+    entitlements:
+      path: TopShelf/TopShelf.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.local.tvarchiv.player
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: local.tvarchiv.player.topshelf
+        PRODUCT_NAME: TopShelf
+        TARGETED_DEVICE_FAMILY: "3"
+        CODE_SIGN_STYLE: Automatic
+    info:
+      path: TopShelf/Info.plist
+      properties:
+        CFBundleDisplayName: "TV Archív Top Shelf"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.tv-top-shelf
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).ContentProvider"
