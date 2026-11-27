@@ -6,11 +6,12 @@ import SwiftUI
 struct ShowTile: View {
     @EnvironmentObject private var player: PlayerCenter
     @EnvironmentObject private var availability: Availability
+    @AppStorage("shows.grayEmpty") private var grayEmpty = true
     let show: ShowCard
     var size = Theme.tileSize
 
     var body: some View {
-        let empty = availability.isEmptyShow(show)
+        let empty = grayEmpty && availability.isEmptyShow(show)
         VStack(alignment: .leading, spacing: 14) {
             Group {
                 if show.isVideo {
@@ -35,16 +36,15 @@ struct ShowTile: View {
     }
 
     private var art: some View {
-        let empty = availability.isEmptyShow(show)
+        let empty = grayEmpty && availability.isEmptyShow(show)
         return RemoteImage(urls: show.artwork)
             .frame(width: size.width, height: size.height)
             .grayscale(empty ? 1 : 0)
             .opacity(empty ? 0.45 : 1)
             .clipped()
-            .overlay(alignment: .topTrailing) {
-                if show.isVideo {
-                    Image(systemName: "play.fill").font(.caption).padding(12).glassCapsule().padding(12)
-                }
+            .overlay(alignment: .top) {
+                TileBadges(logo: availability.logo(of: show),
+                           kind: show.isVideo ? .full : availability.kind(of: show))
             }
             .reportsBackdrop(show.artwork)
     }
@@ -69,14 +69,15 @@ struct VideoTile: View {
                         .clipped()
                     Theme.posterGradient
                     VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            SourceBadge(source: item.source)
+                        HStack(alignment: .top) {
+                            ChannelBadge(logo: item.logo)
                             Spacer()
                             if player.loadingPath == item.path || (onlyAvailable && availability.checking.contains(item.path)) {
                                 ProgressView()
                             } else if availability.isVerified(item) {
                                 Image(systemName: "checkmark.seal.fill").foregroundStyle(Theme.accent)
                             }
+                            KindBadge(kind: item.contentKind)
                         }
                         Spacer()
                         if let entry, entry.fraction > 0.01, !entry.finished {
@@ -161,6 +162,7 @@ struct PageTitle: View {
 struct HomeView: View {
     @EnvironmentObject private var library: Library
     @EnvironmentObject private var availability: Availability
+    @AppStorage("shows.grayEmpty") private var grayEmpty = true
     @State private var state: LoadState<HomeFeed> = .loading
     @State private var latest: [VideoItem] = []
 
@@ -178,7 +180,7 @@ struct HomeView: View {
                             ForEach(unfinished.prefix(20)) { VideoTile(item: $0.item) }
                         }
                     }
-                    let favs = library.favorites.filter { !availability.isEmptyShow($0) }
+                    let favs = grayEmpty ? library.favorites.filter { !availability.isEmptyShow($0) } : library.favorites
                     if !favs.isEmpty {
                         ShelfRow(title: tr("Obľúbené relácie")) {
                             ForEach(favs) { ShowTile(show: $0) }
@@ -196,7 +198,7 @@ struct HomeView: View {
                     }
                     // prázdne relácie (bez videí) na Domove nezobrazujeme
                     ForEach(feed.shelves) { shelf in
-                        let items = shelf.items.filter { !availability.isEmptyShow($0) }
+                        let items = grayEmpty ? shelf.items.filter { !availability.isEmptyShow($0) } : shelf.items
                         if !items.isEmpty {
                             ShelfRow(title: shelf.id) {
                                 ForEach(items) { ShowTile(show: $0) }
@@ -254,7 +256,7 @@ struct HeroCarousel: View {
                         .font(.headline)
                         .padding(.horizontal, 30).padding(.vertical, 14)
                         .glassCapsule()
-                    SourceBadge(source: item.video.source)
+                    ChannelBadge(logo: item.video.logo)
                     if player.loadingPath == item.video.path { ProgressView() }
                 }
                 .padding(.top, 10)
@@ -478,6 +480,7 @@ struct SearchView: View {
             guard !Task.isCancelled else { return }
             searching = false
             let found = r?.shows ?? []
+            availability.remember(found)
             shows = onlyAvailable ? found.filter { !availability.isEmptyShow($0) } : found
             videos = r?.videos ?? []
         }
@@ -686,13 +689,12 @@ struct EpisodeTile: View {
                     .blur(radius: 6)
                     .overlay(Color.black.opacity(0.45))
                 VStack(spacing: 10) {
-                    HStack {
+                    HStack(alignment: .top) {
+                        KindBadge(kind: item.contentKind)
                         if entry?.finished == true {
                             Image(systemName: "checkmark.circle.fill").font(.title3).foregroundStyle(.green)
                         } else if !item.source.playable {
                             Image(systemName: "lock.fill").font(.title3)
-                        } else if item.source == .youtube {
-                            Image(systemName: "play.rectangle.fill").font(.title3)
                         }
                         Spacer()
                         if player.loadingPath == item.path || (onlyAvailable && availability.checking.contains(item.path)) {
@@ -713,8 +715,8 @@ struct EpisodeTile: View {
                     Spacer(minLength: 0)
                     if let entry, entry.fraction > 0.01, !entry.finished {
                         ProgressView(value: entry.fraction).tint(.white)
-                    } else if !item.source.name.isEmpty {
-                        Text(item.source.name).font(.caption2.weight(.semibold)).foregroundStyle(.white.opacity(0.7))
+                    } else {
+                        ChannelBadge(logo: item.logo)
                     }
                 }
                 .foregroundStyle(.white)

@@ -222,3 +222,87 @@ struct SourceBadge: View {
         }
     }
 }
+
+// MARK: - Odznaky na dlaždiciach (logo stanice, typ obsahu)
+
+enum ChannelName {
+    /// Čitateľný názov stanice z názvu súboru loga („joj_play.png“ → „JOJ Play“).
+    static func from(logo: String?) -> String? {
+        guard let logo, !logo.isEmpty else { return nil }
+        let stem = logo.lowercased().components(separatedBy: ".").first ?? logo
+        let map: [(String, String)] = [
+            ("joj_play", "JOJ Play"), ("joj_krimi", "JOJ Krimi"), ("jojplus", "JOJ Plus"), ("joj", "JOJ"),
+            ("dajto", "Dajto"), ("wau", "WAU"), ("markiza", "Markíza"), ("doma", "Doma"),
+            ("nova", "Nova"), ("stvr", "STVR"), ("rtvs", "RTVS"), ("jednotka", "Jednotka"), ("dvojka", "Dvojka"),
+            ("lux", "TV Lux"), ("prima", "Prima"), ("ct", "ČT"), ("ta3", "TA3"), ("yt", "YouTube"), ("ocko", "Óčko")
+        ]
+        for (k, v) in map where stem.hasPrefix(k) { return v }
+        return stem.uppercased()
+    }
+}
+
+/// Logo televízie – malá matne biela kapsula; bez obrázka len decentný názov.
+struct ChannelBadge: View {
+    let logo: String?
+    @State private var image: UIImage?
+
+    var body: some View {
+        Group {
+            if let image {
+                Image(uiImage: image)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+                    .frame(height: 22)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(.white.opacity(0.92), in: Capsule())
+                    .shadow(color: .black.opacity(0.35), radius: 6, y: 2)
+            } else if let name = ChannelName.from(logo: logo) {
+                Text(name.uppercased())
+                    .font(.system(size: 15, weight: .semibold))
+                    .tracking(1.2)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .glassCapsule()
+            }
+        }
+        .transition(.opacity)
+        .task(id: logo) {
+            guard let logo, let u = Net.url("/images/tv/logo/" + logo) else { return }
+            let img = await ImageStore.shared.image(for: u)
+            withAnimation(.easeOut(duration: 0.2)) { image = img }
+        }
+    }
+}
+
+/// Typ obsahu – malý sklenený kruh s bielym symbolom.
+struct KindBadge: View {
+    let kind: ContentKind
+
+    var body: some View {
+        Image(systemName: kind.icon)
+            .font(.system(size: 17, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 40, height: 40)
+            .glassPanel(cornerRadius: 20)
+            .shadow(color: .black.opacity(0.3), radius: 6, y: 2)
+            .accessibilityLabel(kind.label)
+    }
+}
+
+/// Odznaky v rohoch dlaždice.
+struct TileBadges: View {
+    var logo: String?
+    var kind: ContentKind?
+
+    var body: some View {
+        HStack(alignment: .top) {
+            ChannelBadge(logo: logo)
+            Spacer(minLength: 8)
+            if let kind { KindBadge(kind: kind) }
+        }
+        .padding(14)
+    }
+}

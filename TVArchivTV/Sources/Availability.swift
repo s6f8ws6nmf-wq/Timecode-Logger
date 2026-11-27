@@ -58,8 +58,32 @@ final class Availability: ObservableObject {
 
     @Published private(set) var emptyShows: Set<String> = Set(UserDefaults.standard.stringArray(forKey: "emptyShows.v1") ?? [])
 
+    /// Typ obsahu a logo stanice relácií (zistené z vyhľadávania), pamätá sa.
+    @Published private(set) var showMeta: [String: [String: String]] =
+        UserDefaults.standard.dictionary(forKey: "showMeta.v1") as? [String: [String: String]] ?? [:]
+
+    func kind(of show: ShowCard) -> ContentKind? {
+        show.kind ?? showMeta[show.path]?["kind"].flatMap(ContentKind.init(rawValue:))
+    }
+
+    func logo(of show: ShowCard) -> String? {
+        show.logo ?? showMeta[show.path]?["logo"]
+    }
+
+    func remember(_ shows: [ShowCard]) {
+        var changed = false
+        for s in shows where s.kind != nil || s.logo != nil {
+            var m = showMeta[s.path] ?? [:]
+            if let k = s.kind { m["kind"] = k.rawValue }
+            if let l = s.logo { m["logo"] = l }
+            if showMeta[s.path] != m { showMeta[s.path] = m; changed = true }
+            if let hv = s.hasVideo { setShow(s.path, empty: !hv) }
+        }
+        if changed { UserDefaults.standard.set(showMeta, forKey: "showMeta.v1") }
+    }
+
     func isEmptyShow(_ show: ShowCard) -> Bool {
-        show.hasVideo == false || emptyShows.contains(show.path)
+        show.hasVideo == false || emptyShows.contains(show.path) || kind(of: show) == ContentKind.none
     }
 
     private var probedShows: Set<String> = Set(UserDefaults.standard.stringArray(forKey: "probedShows.v1") ?? [])
@@ -79,9 +103,8 @@ final class Availability: ObservableObject {
             let show = probeQueue.removeFirst()
             probing += 1
             Task {
-                if let r = try? await Site.search(show.title),
-                   let hit = r.shows.first(where: { $0.path == show.path }) {
-                    self.setShow(show.path, empty: hit.hasVideo == false)
+                if let r = try? await Site.search(show.title) {
+                    self.remember(r.shows)
                 }
                 self.probedShows.insert(show.path)
                 UserDefaults.standard.set(Array(self.probedShows), forKey: "probedShows.v1")
@@ -99,6 +122,8 @@ final class Availability: ObservableObject {
 
     func clear() {
         emptyShows = []
+        showMeta = [:]
+        UserDefaults.standard.removeObject(forKey: "showMeta.v1")
         probedShows = []
         UserDefaults.standard.removeObject(forKey: "probedShows.v1")
         UserDefaults.standard.removeObject(forKey: "emptyShows.v1")

@@ -11,6 +11,8 @@ struct ShowCard: Identifiable, Hashable, Codable {
     var logo: String? = nil
     /// Má relácia videá? (z vyhľadávania: ikonka pri názve; nil = nevieme)
     var hasVideo: Bool? = nil
+    /// Typ obsahu relácie (full = celé diely, clips = iba klipy, none = bez videí)
+    var kind: ContentKind? = nil
 
     var imageURL: URL? { image.flatMap { Net.url($0) } }
 
@@ -23,7 +25,7 @@ struct ShowCard: Identifiable, Hashable, Codable {
     var artwork: [URL] { Artwork.urls(slug: slug, extra: image) }
 
     var asVideo: VideoItem {
-        VideoItem(path: path, title: title, showTitle: info, source: .from(logo: logo))
+        VideoItem(path: path, title: title, showTitle: info, source: .from(logo: logo), logo: logo, kind: .full)
     }
 }
 
@@ -95,6 +97,42 @@ enum VideoSource: String, Codable, CaseIterable {
     var playable: Bool { self != .prima }
 }
 
+/// Typ obsahu pre ikonku na dlaždici.
+enum ContentKind: String, Codable, CaseIterable {
+    case full, youtube, bonus, web, clips, none
+
+    var icon: String {
+        switch self {
+        case .full: return "play.tv.fill"
+        case .youtube: return "play.rectangle.fill"
+        case .bonus: return "gift.fill"
+        case .web: return "globe"
+        case .clips: return "film"
+        case .none: return "nosign"
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .full: return tr("Celá relácia / celý diel")
+        case .youtube: return tr("Video na YouTube")
+        case .bonus: return tr("Bonus")
+        case .web: return tr("Video na webe")
+        case .clips: return tr("Iba klipy a ukážky")
+        case .none: return tr("Bez videí")
+        }
+    }
+
+    /// Typ podľa názvu skupiny na stránke relácie.
+    static func from(group: String, source: VideoSource) -> ContentKind {
+        if source == .youtube { return .youtube }
+        let g = group.lowercased()
+        if g.contains("bonus") { return .bonus }
+        if g.contains("vide") || g.contains("ukážk") || g.contains("ukazk") || g.contains("klip") { return .web }
+        return .full
+    }
+}
+
 struct VideoItem: Identifiable, Hashable, Codable {
     var id: String { path }
     let path: String
@@ -102,6 +140,13 @@ struct VideoItem: Identifiable, Hashable, Codable {
     let showTitle: String
     let source: VideoSource
     var note: String = ""
+    var logo: String? = nil
+    var kind: ContentKind? = nil
+
+    var contentKind: ContentKind {
+        if source == .youtube || path.hasSuffix("/reel") { return .youtube }
+        return kind ?? .full
+    }
 
     var artwork: [URL] {
         Artwork.urls(slug: showPath.trimmingCharacters(in: CharacterSet(charactersIn: "/")), extra: nil)
@@ -192,7 +237,7 @@ enum Site {
                 let ep = parts.count > 1 ? HTML.text("<br" + parts.dropFirst().joined(separator: "<br")) : ""
                 let logo = HTML.first("logo/([^\"]+)\"", in: m)
                 hero.append(HeroItem(video: VideoItem(path: path, title: ep.isEmpty ? show : ep, showTitle: show,
-                                                      source: .from(logo: logo)), image: img))
+                                                      source: .from(logo: logo), logo: logo, kind: .full), image: img))
             }
         }
         var shelves: [Shelf] = []
@@ -260,9 +305,12 @@ enum Site {
             let logo = HTML.first("logo/([^\"]+)\"", in: r)
             let kind = HTML.text(HTML.remove("<div class=\"tooltip\">.*?</div>", from: cells[1]))
             let when = cells.count >= 5 ? HTML.text(cells[4]) : ""
+            let k = kind.lowercased()
+            let ck: ContentKind = k.contains("cel") ? .full : (k.contains("bonus") ? .bonus : .web)
             out.append(VideoItem(path: link[1], title: HTML.text(link[2]), showTitle: HTML.text(cells[0]),
                                  source: .from(logo: logo),
-                                 note: [kind, when].filter { !$0.isEmpty }.joined(separator: " · ")))
+                                 note: [kind, when].filter { !$0.isEmpty }.joined(separator: " · "),
+                                 logo: logo, kind: ck))
         }
         return out
     }
@@ -278,7 +326,10 @@ enum Site {
             guard let path = r["url"] as? String else { return nil }
             let rawName = r["name"] as? String ?? ""
             // ikonka prehrávania (_red = celé diely/film, _blue = videá); bez ikonky relácia nemá videá
-            let hasVideo = HTML.first("/images/play/(_[a-z]+)_16", in: rawName) != nil
+            let play = HTML.first("/images/play/(_[a-z]+)_16", in: rawName)
+            let hasVideo = play != nil
+            let kind: ContentKind = play == nil ? .none : (play == "_red" ? .full : .clips)
+            let logo = HTML.first("logo/([^\"]+)\"", in: rawName + (r["description"] as? String ?? ""))
             var nameHTML = HTML.remove("<div class=\"tooltip\">.*?</div>", from: rawName)
             nameHTML = HTML.remove("<span style=\"font-size[^\"]*\">.*?</span>", from: nameHTML)
             let plain = HTML.text(nameHTML).trimmingCharacters(in: CharacterSet(charactersIn: " ;"))
@@ -288,7 +339,8 @@ enum Site {
                 title = m[1]
                 info = m[2]
             }
-            return ShowCard(path: path, title: title, info: info, image: r["img"] as? String, hasVideo: hasVideo)
+            return ShowCard(path: path, title: title, info: info, image: r["img"] as? String, logo: logo,
+                            hasVideo: hasVideo, kind: kind)
         }
         let videos: [VideoItem] = (obj["videos"] as? [[String: Any]] ?? []).compactMap { v in
             guard let path = v["url"] as? String, path.split(separator: "/").count >= 2 else { return nil }
@@ -350,7 +402,9 @@ enum Site {
             if g.isEmpty { g = "Ostatné" }
             seen.insert(path)
             if groups[g] == nil { order.append(g) }
-            groups[g, default: []].append(VideoItem(path: path, title: title, showTitle: showTitle, source: .from(logo: logo)))
+            let src = VideoSource.from(logo: logo)
+            groups[g, default: []].append(VideoItem(path: path, title: title, showTitle: showTitle, source: src,
+                                                    logo: logo, kind: .from(group: g, source: src)))
         }
         return order.map { EpisodeGroup(id: $0, items: groups[$0] ?? []) }.filter { !$0.items.isEmpty }
     }

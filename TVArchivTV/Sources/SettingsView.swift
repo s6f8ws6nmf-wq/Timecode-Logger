@@ -4,6 +4,7 @@ struct SettingsView: View {
     @EnvironmentObject private var library: Library
     @EnvironmentObject private var availability: Availability
     @AppStorage("filter.onlyAvailable") private var onlyAvailable = false
+    @AppStorage("shows.grayEmpty") private var grayEmpty = true
     @AppStorage(AppLanguage.storageKey) private var lang = AppLanguage.sk.rawValue
     @State private var cleared: String?
 
@@ -25,6 +26,30 @@ struct SettingsView: View {
                     Text(tr("Pri „Iba dostupný obsah“ aplikácia overí, či sa video naozaj dá prehrať, a nedostupné skryje. Výsledok si pamätá 3 dni."))
                         .font(.caption).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
+                }
+
+                section(tr("Relácie bez videí")) {
+                    GlassGroup(spacing: 16) {
+                        HStack(spacing: 16) {
+                            Button { grayEmpty = true } label: { Text(tr("Čiernobielo a skryť na Domove")).fixedSize() }
+                                .glassButton(prominent: grayEmpty)
+                            Button { grayEmpty = false } label: { Text(tr("Zobrazovať normálne")).fixedSize() }
+                                .glassButton(prominent: !grayEmpty)
+                        }
+                    }
+                }
+
+                section(tr("Ikonky na dlaždiciach")) {
+                    ForEach(ContentKind.allCases, id: \.self) { k in
+                        HStack(spacing: 20) {
+                            KindBadge(kind: k)
+                            Text(k.label)
+                        }
+                    }
+                    HStack(spacing: 20) {
+                        ChannelBadge(logo: "joj.png")
+                        Text(tr("Logo televízie, na ktorej relácia beží"))
+                    }
                 }
 
                 section(tr("Jazyk")) {
