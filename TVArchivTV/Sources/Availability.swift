@@ -54,7 +54,23 @@ final class Availability: ObservableObject {
         }
     }
 
+    // MARK: Relácie bez videí (zapamätané po otvorení detailu)
+
+    @Published private(set) var emptyShows: Set<String> = Set(UserDefaults.standard.stringArray(forKey: "emptyShows.v1") ?? [])
+
+    func isEmptyShow(_ show: ShowCard) -> Bool {
+        show.hasVideo == false || emptyShows.contains(show.path)
+    }
+
+    func setShow(_ path: String, empty: Bool) {
+        guard emptyShows.contains(path) != empty else { return }
+        if empty { emptyShows.insert(path) } else { emptyShows.remove(path) }
+        UserDefaults.standard.set(Array(emptyShows), forKey: "emptyShows.v1")
+    }
+
     func clear() {
+        emptyShows = []
+        UserDefaults.standard.removeObject(forKey: "emptyShows.v1")
         status = [:]
         stamps = [:]
         UserDefaults.standard.removeObject(forKey: key)

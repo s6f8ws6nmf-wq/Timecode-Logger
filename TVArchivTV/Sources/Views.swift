@@ -5,10 +5,12 @@ import SwiftUI
 /// Krajinková dlaždica relácie (alebo filmu) – obrázok, pod ním názov.
 struct ShowTile: View {
     @EnvironmentObject private var player: PlayerCenter
+    @EnvironmentObject private var availability: Availability
     let show: ShowCard
     var size = Theme.tileSize
 
     var body: some View {
+        let empty = availability.isEmptyShow(show)
         VStack(alignment: .leading, spacing: 14) {
             Group {
                 if show.isVideo {
@@ -21,8 +23,10 @@ struct ShowTile: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(show.title).font(.callout.weight(.semibold)).lineLimit(1)
-                if !show.info.isEmpty {
-                    Text(show.info).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                    .foregroundStyle(empty ? .secondary : .primary)
+                let info = empty ? [show.info, tr("Bez videí")].filter { !$0.isEmpty }.joined(separator: " · ") : show.info
+                if !info.isEmpty {
+                    Text(info).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
                 }
             }
             .frame(width: size.width, alignment: .leading)
@@ -30,8 +34,11 @@ struct ShowTile: View {
     }
 
     private var art: some View {
-        RemoteImage(urls: show.artwork)
+        let empty = availability.isEmptyShow(show)
+        return RemoteImage(urls: show.artwork)
             .frame(width: size.width, height: size.height)
+            .grayscale(empty ? 1 : 0)
+            .opacity(empty ? 0.45 : 1)
             .clipped()
             .overlay(alignment: .topTrailing) {
                 if show.isVideo {
@@ -417,6 +424,8 @@ private struct LetterGrid: View {
 // MARK: - Hľadanie
 
 struct SearchView: View {
+    @EnvironmentObject private var availability: Availability
+    @AppStorage("filter.onlyAvailable") private var onlyAvailable = false
     @State private var query = ""
     @State private var shows: [ShowCard] = []
     @State private var videos: [VideoItem] = []
@@ -461,7 +470,8 @@ struct SearchView: View {
             let r = try? await Site.search(q)
             guard !Task.isCancelled else { return }
             searching = false
-            shows = r?.shows ?? []
+            let found = r?.shows ?? []
+            shows = onlyAvailable ? found.filter { !availability.isEmptyShow($0) } : found
             videos = r?.videos ?? []
         }
     }
@@ -642,7 +652,11 @@ struct ShowDetailView: View {
 
     private func load() async {
         state = .loading
-        do { state = .loaded(try await Site.detail(of: show)) } catch { state = .failed(error.localizedDescription) }
+        do {
+            let d = try await Site.detail(of: show)
+            availability.setShow(show.path, empty: d.groups.isEmpty)
+            state = .loaded(d)
+        } catch { state = .failed(error.localizedDescription) }
     }
 }
 

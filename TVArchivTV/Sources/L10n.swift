@@ -135,6 +135,7 @@ enum L10n {
         "Toto video je na YouTube. Nainštalujte si aplikáciu YouTube na Apple TV (ID videa: %@).":
             "This video is on YouTube. Please install the YouTube app on Apple TV (video ID: %@).",
         "Len s predplatným": "Subscription only",
+        "Bez videí": "No videos",
         "Platnosť aplikácie dnes vyprší. Nainštalujte ju znovu cez Sideloadly.": "The app expires today. Please reinstall it with Sideloadly.",
         "O 1 deň bude potrebné aplikáciu nainštalovať znovu cez Sideloadly.": "In 1 day you will need to reinstall the app with Sideloadly.",
         "Platnosť inštalácie": "Installation valid for",

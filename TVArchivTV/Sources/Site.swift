@@ -9,6 +9,8 @@ struct ShowCard: Identifiable, Hashable, Codable {
     let info: String
     let image: String?
     var logo: String? = nil
+    /// Má relácia videá? (z vyhľadávania: ikonka pri názve; nil = nevieme)
+    var hasVideo: Bool? = nil
 
     var imageURL: URL? { image.flatMap { Net.url($0) } }
 
@@ -274,7 +276,10 @@ enum Site {
         guard let obj = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { return ([], []) }
         let shows: [ShowCard] = (obj["results"] as? [[String: Any]] ?? []).compactMap { r in
             guard let path = r["url"] as? String else { return nil }
-            var nameHTML = HTML.remove("<div class=\"tooltip\">.*?</div>", from: r["name"] as? String ?? "")
+            let rawName = r["name"] as? String ?? ""
+            // ikonka prehrávania (_red = celé diely/film, _blue = videá); bez ikonky relácia nemá videá
+            let hasVideo = HTML.first("/images/play/(_[a-z]+)_16", in: rawName) != nil
+            var nameHTML = HTML.remove("<div class=\"tooltip\">.*?</div>", from: rawName)
             nameHTML = HTML.remove("<span style=\"font-size[^\"]*\">.*?</span>", from: nameHTML)
             let plain = HTML.text(nameHTML).trimmingCharacters(in: CharacterSet(charactersIn: " ;"))
             var title = plain
@@ -283,7 +288,7 @@ enum Site {
                 title = m[1]
                 info = m[2]
             }
-            return ShowCard(path: path, title: title, info: info, image: r["img"] as? String)
+            return ShowCard(path: path, title: title, info: info, image: r["img"] as? String, hasVideo: hasVideo)
         }
         let videos: [VideoItem] = (obj["videos"] as? [[String: Any]] ?? []).compactMap { v in
             guard let path = v["url"] as? String, path.split(separator: "/").count >= 2 else { return nil }
