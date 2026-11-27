@@ -12,6 +12,7 @@ enum TopShelfStore {
         let showTitle: String
         let progress: Double
         let image: String?
+        let remoteImage: String?
     }
 
     private static var directory: URL? {
@@ -35,7 +36,8 @@ enum TopShelfStore {
                 let hasImage = FileManager.default.fileExists(atPath: file.path)
                 if hasImage { keep.insert(name) }
                 entries.append(Entry(path: h.item.path, title: h.item.title, showTitle: h.item.showTitle,
-                                     progress: h.fraction, image: hasImage ? name : nil))
+                                     progress: h.fraction, image: hasImage ? name : nil,
+                                     remoteImage: h.item.artwork.last?.absoluteString))
             }
             if let data = try? JSONEncoder().encode(entries) {
                 try? data.write(to: dir.appendingPathComponent("items.json"), options: .atomic)
