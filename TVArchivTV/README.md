@@ -22,6 +22,8 @@ panely a lištu kariet), na starších systémoch matný materiál.
 - **Top Shelf** (horná lišta Apple TV pri ikone aplikácie): *Pokračovať v pozeraní* ako Netflix – kliknutím sa video
   hneď spustí. Funguje cez App Group `group.local.tvarchiv.player`; ak ju podpisovací nástroj nepodporí,
   zobrazí sa len obrázok bez textu.
+- **Filter** (detail relácie a Najnovšie): *Iba dostupné videá* – aplikácia overí, či sa stream naozaj dá prehrať,
+  a nedostupné skryje (výsledok si pamätá 3 dni); *Zoradiť* od najnovšieho / od najstaršieho
 - detail relácie: epizódy ako štvorcové dlaždice, popis, skupiny (Archív, Bonusy, Videá…), zoznam epizód
 
 ## Zdroje videí

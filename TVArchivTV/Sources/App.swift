@@ -5,6 +5,7 @@ struct TVArchivApp: App {
     @StateObject private var library: Library
     @StateObject private var player: PlayerCenter
     @StateObject private var backdrop = Backdrop()
+    @StateObject private var availability = Availability()
 
     init() {
         let lib = Library()
@@ -18,6 +19,7 @@ struct TVArchivApp: App {
                 .environmentObject(library)
                 .environmentObject(player)
                 .environmentObject(backdrop)
+                .environmentObject(availability)
                 .preferredColorScheme(.dark)
                 .tint(Theme.accent)
         }

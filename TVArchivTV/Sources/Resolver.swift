@@ -45,6 +45,26 @@ enum Resolver {
         return .unavailable(lastReason)
     }
 
+    /// Overí, či sa video naozaj dá prehrať: zistí stream a skúsi stiahnuť jeho začiatok.
+    static func verify(path: String) async -> Bool {
+        switch await resolve(path: path) {
+        case .youtube: return true
+        case .unavailable: return false
+        case let .stream(url, headers):
+            var req = URLRequest(url: url, timeoutInterval: 12)
+            headers.forEach { req.setValue($1, forHTTPHeaderField: $0) }
+            req.setValue(Net.userAgent, forHTTPHeaderField: "User-Agent")
+            req.setValue("bytes=0-2047", forHTTPHeaderField: "Range")
+            guard let (data, resp) = try? await Net.session.data(for: req),
+                  let http = resp as? HTTPURLResponse else { return false }
+            guard (200..<300).contains(http.statusCode) else { return false }
+            if url.absoluteString.lowercased().contains(".m3u8") || http.mimeType?.contains("mpegurl") == true {
+                return String(decoding: data.prefix(64), as: UTF8.self).contains("#EXTM3U")
+            }
+            return !data.isEmpty
+        }
+    }
+
     // MARK: - Jednotlivé zdroje
 
     static func resolveTarget(_ url: URL, depth: Int) async -> Playback {

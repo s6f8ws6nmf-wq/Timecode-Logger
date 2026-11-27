@@ -46,6 +46,8 @@ struct ShowTile: View {
 struct VideoTile: View {
     @EnvironmentObject private var player: PlayerCenter
     @EnvironmentObject private var library: Library
+    @EnvironmentObject private var availability: Availability
+    @AppStorage("filter.onlyAvailable") private var onlyAvailable = false
     let item: VideoItem
     var size = Theme.tileSize
 
@@ -62,7 +64,11 @@ struct VideoTile: View {
                         HStack {
                             SourceBadge(source: item.source)
                             Spacer()
-                            if player.loadingPath == item.path { ProgressView() }
+                            if player.loadingPath == item.path || (onlyAvailable && availability.checking.contains(item.path)) {
+                                ProgressView()
+                            } else if availability.isVerified(item) {
+                                Image(systemName: "checkmark.seal.fill").foregroundStyle(Theme.accent)
+                            }
                         }
                         Spacer()
                         if let entry, entry.fraction > 0.01, !entry.finished {
@@ -79,6 +85,7 @@ struct VideoTile: View {
                 Button("Prehrať od začiatku") { player.play(item, fromStart: true) }
                 if entry != nil { Button("Odstrániť z histórie", role: .destructive) { library.remove(item.path) } }
             }
+            .task(id: onlyAvailable) { if onlyAvailable { availability.check(item) } }
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.showTitle.isEmpty ? item.title : item.showTitle)
@@ -238,6 +245,9 @@ struct HeroCarousel: View {
 
 struct LatestView: View {
     @State private var state: LoadState<[VideoItem]> = .loading
+    @EnvironmentObject private var availability: Availability
+    @AppStorage("filter.onlyAvailable") private var onlyAvailable = false
+    @AppStorage("filter.oldestFirst") private var oldestFirst = false
 
     var body: some View {
         ScrollView {
@@ -251,13 +261,22 @@ struct LatestView: View {
                 switch state {
                 case .loading: LoadingView()
                 case .failed(let msg): ErrorView(message: msg) { Task { await load() } }
-                case .loaded(let items): VideoGrid(items: items)
+                case .loaded(let all):
+                    let items = filtered(all)
+                    FilterMenu(shown: items.count, total: all.count)
+                    VideoGrid(items: items)
                 }
             }
             .padding(.horizontal, 80)
             .padding(.bottom, 80)
         }
         .task { if case .loading = state { await load() } }
+    }
+
+    private func filtered(_ all: [VideoItem]) -> [VideoItem] {
+        var r = all
+        if onlyAvailable { r = r.filter { !availability.isUnavailable($0) } }
+        return EpisodeOrder.sorted(r, oldestFirst: oldestFirst)
     }
 
     private func load() async {
@@ -483,6 +502,9 @@ struct MineView: View {
 struct ShowDetailView: View {
     @EnvironmentObject private var library: Library
     @EnvironmentObject private var player: PlayerCenter
+    @EnvironmentObject private var availability: Availability
+    @AppStorage("filter.onlyAvailable") private var onlyAvailable = false
+    @AppStorage("filter.oldestFirst") private var oldestFirst = false
     let show: ShowCard
     @State private var state: LoadState<ShowDetail> = .loading
     @State private var group: String?
@@ -550,6 +572,8 @@ struct ShowDetailView: View {
             }
 
             if let current {
+                let items = displayed(current.items)
+                FilterMenu(shown: items.count, total: current.items.count)
                 ScrollView(.horizontal, showsIndicators: false) {
                     GlassGroup(spacing: 14) {
                         HStack(spacing: 14) {
@@ -569,9 +593,13 @@ struct ShowDetailView: View {
 
                 LazyVGrid(columns: Array(repeating: GridItem(.fixed(EpisodeTile.side), spacing: 40), count: 5),
                           alignment: .leading, spacing: 44) {
-                    ForEach(current.items) { EpisodeTile(item: $0) }
+                    ForEach(items) { EpisodeTile(item: $0) }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                if items.isEmpty && onlyAvailable {
+                    Text(availability.checking.isEmpty ? "Žiadne dostupné videá v tejto skupine." : "Overujem dostupnosť…")
+                        .foregroundStyle(.secondary)
+                }
             } else {
                 Text("Táto relácia zatiaľ nemá žiadne videá.").foregroundStyle(.secondary)
             }
@@ -579,6 +607,14 @@ struct ShowDetailView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 80)
         .padding(.bottom, 80)
+    }
+
+    private func displayed(_ items: [VideoItem]) -> [VideoItem] {
+        var r = items
+        if onlyAvailable {
+            r = r.filter { !availability.isUnavailable($0) }
+        }
+        return EpisodeOrder.sorted(r, oldestFirst: oldestFirst)
     }
 
     private func resumeItem(in g: EpisodeGroup) -> VideoItem? {
@@ -602,6 +638,8 @@ struct EpisodeTile: View {
     static let side: CGFloat = 300
     @EnvironmentObject private var player: PlayerCenter
     @EnvironmentObject private var library: Library
+    @EnvironmentObject private var availability: Availability
+    @AppStorage("filter.onlyAvailable") private var onlyAvailable = false
     let item: VideoItem
 
     var body: some View {
@@ -623,7 +661,11 @@ struct EpisodeTile: View {
                             Image(systemName: "play.rectangle.fill").font(.title3)
                         }
                         Spacer()
-                        if player.loadingPath == item.path { ProgressView() }
+                        if player.loadingPath == item.path || (onlyAvailable && availability.checking.contains(item.path)) {
+                            ProgressView()
+                        } else if availability.isVerified(item) {
+                            Image(systemName: "checkmark.seal.fill").font(.callout).foregroundStyle(Theme.accent)
+                        }
                     }
                     Spacer(minLength: 0)
                     Text(item.shortTitle)
@@ -652,6 +694,7 @@ struct EpisodeTile: View {
             Button("Prehrať od začiatku") { player.play(item, fromStart: true) }
             if entry != nil { Button("Odstrániť z histórie", role: .destructive) { library.remove(item.path) } }
         }
+        .task(id: onlyAvailable) { if onlyAvailable { availability.check(item) } }
     }
 }
 
