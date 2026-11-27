@@ -390,23 +390,33 @@ struct SearchView: View {
     @State private var videos: [VideoItem] = []
     @State private var searching = false
 
+    /// Menšie dlaždice a prispôsobivá mriežka – vedľa klávesnice je na tvOS menej miesta.
+    private static let tile = CGSize(width: 300, height: 169)
+    private let columns = [GridItem(.adaptive(minimum: SearchView.tile.width, maximum: SearchView.tile.width),
+                                    spacing: 36, alignment: .top)]
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 40) {
+            VStack(alignment: .leading, spacing: 36) {
                 if searching { LoadingView() }
                 if !shows.isEmpty {
                     Text("Relácie").font(.title3.weight(.bold))
-                    ShowGrid(shows: shows)
+                    LazyVGrid(columns: columns, alignment: .leading, spacing: 40) {
+                        ForEach(shows) { ShowTile(show: $0, size: Self.tile) }
+                    }
                 }
                 if !videos.isEmpty {
                     Text("Videá").font(.title3.weight(.bold))
-                    VideoGrid(items: videos)
+                    LazyVGrid(columns: columns, alignment: .leading, spacing: 40) {
+                        ForEach(videos) { VideoTile(item: $0, size: Self.tile) }
+                    }
                 }
                 if !searching && shows.isEmpty && videos.isEmpty && query.count >= 2 {
                     Text("Nič sa nenašlo.").foregroundStyle(.secondary)
                 }
             }
-            .padding(.horizontal, 80)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 40)
             .padding(.bottom, 80)
         }
         .searchable(text: $query, prompt: "Relácie, seriály, filmy")
