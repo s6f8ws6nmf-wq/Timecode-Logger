@@ -246,6 +246,16 @@ struct ChannelBadge: View {
     let logo: String?
     @State private var image: UIImage?
 
+    /// Najkvalitnejší dostupný súbor loga (niektoré na stránke majú 16 px alebo sú .ico/.svg).
+    static func bestLogo(_ logo: String?) -> String? {
+        guard let l = logo?.lowercased(), !l.isEmpty else { return nil }
+        if l.hasPrefix("yt") { return nil }                 // YouTube ukazuje už typ obsahu
+        if l.hasPrefix("joj_play") { return "joj.png" }
+        if l.hasPrefix("markiza") { return "markiza3.png" }
+        if l.hasSuffix(".ico") || l.hasSuffix(".svg") { return nil }  // tieto UIImage nenačíta → text
+        return logo
+    }
+
     var body: some View {
         Group {
             if let image {
@@ -258,7 +268,7 @@ struct ChannelBadge: View {
                     .padding(.vertical, 7)
                     .background(.white.opacity(0.92), in: Capsule())
                     .shadow(color: .black.opacity(0.35), radius: 6, y: 2)
-            } else if let name = ChannelName.from(logo: logo) {
+            } else if let name = ChannelName.from(logo: logo), name != "YouTube" {
                 Text(name.uppercased())
                     .font(.system(size: 15, weight: .semibold))
                     .tracking(1.2)
@@ -270,7 +280,7 @@ struct ChannelBadge: View {
         }
         .transition(.opacity)
         .task(id: logo) {
-            guard let logo, let u = Net.url("/images/tv/logo/" + logo) else { return }
+            guard let file = ChannelBadge.bestLogo(logo), let u = Net.url("/images/tv/logo/" + file) else { return }
             let img = await ImageStore.shared.image(for: u)
             withAnimation(.easeOut(duration: 0.2)) { image = img }
         }
