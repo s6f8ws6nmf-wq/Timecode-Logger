@@ -23,15 +23,20 @@ struct WebcamGroup: Codable, Identifiable, Hashable {
     let title: String
     let region: String
     let cams: [Webcam]
+    /// Skupina patrí do karty Live (napr. letiská), nie medzi Webkamery.
+    var live: Bool? = nil
 }
 
 struct WebcamCatalog: Codable {
     let version: Int
     let groups: [WebcamGroup]
 
+    var webcamGroups: [WebcamGroup] { groups.filter { $0.live != true } }
+    var liveGroups: [WebcamGroup] { groups.filter { $0.live == true } }
+
     var regions: [String] {
         var seen = Set<String>(); var out: [String] = []
-        for g in groups where !seen.contains(g.region) { seen.insert(g.region); out.append(g.region) }
+        for g in webcamGroups where !seen.contains(g.region) { seen.insert(g.region); out.append(g.region) }
         return out
     }
 }

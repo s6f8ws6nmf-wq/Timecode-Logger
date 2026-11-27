@@ -1,5 +1,5 @@
 {
- "version": 1,
+ "version": 2,
  "updated": "2026-11-27",
  "groups": [
   {
@@ -400,6 +400,79 @@
      "name": "Zvieratá v snehu",
      "place": "Michigan",
      "youtube": "TPGY7UYzbKw"
+    }
+   ]
+  },
+  {
+   "id": "airports",
+   "title": "Letiská",
+   "region": "Letiská",
+   "live": true,
+   "cams": [
+    {
+     "name": "Praha – Letisko Václava Havla",
+     "place": "Česko",
+     "youtube": "Deo_lcwn8lk"
+    },
+    {
+     "name": "Londýn – Heathrow",
+     "place": "BIG JET TV",
+     "youtube": "uDBYuEV4zjI"
+    },
+    {
+     "name": "Londýn – Heathrow",
+     "place": "Flightradar24",
+     "youtube": "SgvpyjQX_HM"
+    },
+    {
+     "name": "Svätý Martin – Maho Beach",
+     "place": "Karibik",
+     "youtube": "2IQmpCXbOmM"
+    },
+    {
+     "name": "Lisabon",
+     "place": "Portugalsko",
+     "youtube": "DX4aYkEDcw4"
+    },
+    {
+     "name": "Málaga",
+     "place": "Španielsko",
+     "youtube": "A6R81wOlQqs"
+    },
+    {
+     "name": "Lanzarote",
+     "place": "Kanárske ostrovy",
+     "youtube": "AAlo3eCPVbk"
+    },
+    {
+     "name": "Los Angeles – LAX 24L/24R",
+     "place": "USA",
+     "youtube": "n4I0d44oBEs"
+    },
+    {
+     "name": "Los Angeles – LAX 25L/25R",
+     "place": "USA",
+     "youtube": "KzsNnyN8D_Q"
+    },
+    {
+     "name": "San Francisco – SFO",
+     "place": "USA",
+     "youtube": "sTVM6Sc80X0"
+    },
+    {
+     "name": "Las Vegas – LAS",
+     "place": "USA",
+     "youtube": "V7_orOtu-oo"
+    },
+    {
+     "name": "New York – LaGuardia",
+     "place": "USA",
+     "youtube": "T_QsY01tIK0"
+    },
+    {
+     "name": "Barbados – BGI",
+     "place": "Karibik",
+     "youtube": "XLDtjtfqIYw"
     }
    ]
   }

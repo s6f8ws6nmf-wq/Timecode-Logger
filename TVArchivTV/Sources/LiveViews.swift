@@ -4,12 +4,22 @@ import SwiftUI
 
 struct LiveView: View {
     @EnvironmentObject private var player: PlayerCenter
+    @State private var catalog: WebcamCatalog?
     private let columns = Array(repeating: GridItem(.fixed(380), spacing: 40), count: 4)
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 34) {
-                PageTitle(text: "Živé vysielanie")
+                PageTitle(text: "Živé vysielanie").padding(.horizontal, 80)
+                content
+            }
+            .padding(.bottom, 80)
+        }
+        .task { if catalog == nil { catalog = await WebcamStore.load() } }
+    }
+
+    @ViewBuilder private var content: some View {
+        VStack(alignment: .leading, spacing: 34) {
                 ForEach(groups, id: \.self) { group in
                     Text(group).font(.title3.weight(.bold))
                     GlassGroup(spacing: 40) {
@@ -39,9 +49,16 @@ struct LiveView: View {
                 }
                 Text("Česká televize vysiela väčšinu programov len pre Česko; ČT24 býva dostupná aj na Slovensku.")
                     .font(.caption).foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 80)
+
+        // letiská a ďalšie živé zábery (zo zoznamu webcams.json, skupiny s "live": true)
+        if let catalog {
+            ForEach(catalog.liveGroups) { g in
+                ShelfRow(title: g.title) {
+                    ForEach(g.cams) { WebcamTile(cam: $0) }
+                }
             }
-            .padding(.horizontal, 80)
-            .padding(.bottom, 80)
         }
     }
 
@@ -186,7 +203,7 @@ struct WebcamsView: View {
             if !fav.isEmpty { rows.append(Row(title: "Obľúbené kamery", cams: fav)) }
             if region == "Obľúbené" { return rows }
         }
-        for g in c.groups where region == "Všetko" || g.region == region {
+        for g in c.webcamGroups where region == "Všetko" || g.region == region {
             let cams = g.cams.filter(match)
             if !cams.isEmpty { rows.append(Row(title: g.title, cams: cams)) }
         }
