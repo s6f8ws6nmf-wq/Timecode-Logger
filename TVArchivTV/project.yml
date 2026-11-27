@@ -6,8 +6,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "5.1.0"
-    CURRENT_PROJECT_VERSION: "14"
+    MARKETING_VERSION: "5.2.0"
+    CURRENT_PROJECT_VERSION: "15"
 targets:
   TVArchivTV:
     type: application
@@ -17,11 +17,6 @@ targets:
       - Resources
     dependencies:
       - target: TopShelf
-    entitlements:
-      path: Sources/TVArchiv.entitlements
-      properties:
-        com.apple.security.application-groups:
-          - group.local.tvarchiv.player
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: local.tvarchiv.player
@@ -52,11 +47,6 @@ targets:
       - path: Sources/Net.swift
       - path: Sources/Site.swift
       - path: Sources/L10n.swift
-    entitlements:
-      path: TopShelf/TopShelf.entitlements
-      properties:
-        com.apple.security.application-groups:
-          - group.local.tvarchiv.player
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: local.tvarchiv.player.topshelf

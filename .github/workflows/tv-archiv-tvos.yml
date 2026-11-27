@@ -52,12 +52,12 @@ jobs:
           PL="Payload/$(basename "$APP")/Info.plist"
           /usr/libexec/PlistBuddy -c "Add :TVABuildDate string $(TZ=Europe/Bratislava date '+%d.%m.%Y %H:%M')" "$PL"
           /usr/libexec/PlistBuddy -c "Add :TVACommit string ${GITHUB_SHA::7}" "$PL"
-          # ad-hoc podpis s entitlements (App Group pre Top Shelf) – Sideloadly ich prevezme pri prepodpise
+          # ad-hoc podpis bez entitlements (App Group Sideloadly s bezplatným Apple ID nezachová)
           APPN=$(basename "$APP")
           for EXT in "Payload/$APPN"/PlugIns/*.appex; do
-            [ -d "$EXT" ] && codesign -f -s - --entitlements TopShelf/TopShelf.entitlements "$EXT"
+            [ -d "$EXT" ] && codesign -f -s - "$EXT"
           done
-          codesign -f -s - --entitlements Sources/TVArchiv.entitlements "Payload/$APPN"
+          codesign -f -s - "Payload/$APPN"
           codesign -d --entitlements - "Payload/$APPN" || true
           ls "Payload/$APPN/PlugIns" || true
           # kontrola: doplnok musí mať CFBundlePackageType = XPC!

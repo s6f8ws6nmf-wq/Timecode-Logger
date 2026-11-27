@@ -138,6 +138,7 @@ enum L10n {
         "Bez videí": "No videos",
         "funguje": "working",
         "nefunguje (Sideloadly ju nezachoval)": "not working (not kept by Sideloadly)",
+        "nepoužíva sa (bezplatný podpis ju nepodporuje)": "not used (not supported by free signing)",
         "Posledný beh doplnku": "Last extension run",
         "zatiaľ nebežal (alebo nevidno – App Group)": "not run yet (or not visible – App Group)",
         "Top Shelf sa zobrazí, keď je ikona aplikácie v hornom rade a prejdete na ňu. Po inštalácii môže trvať pár minút, kým ho tvOS prvýkrát načíta.":

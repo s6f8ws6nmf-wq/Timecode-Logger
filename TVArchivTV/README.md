@@ -25,9 +25,8 @@ Menu: **Domov · Relácie · Live · Hľadať · Nastavenia**. Aplikácia je po 
 - prehrávač: menu **Obraz** v lište – *Roztiahnuť na 16:9* pre videá stlačené na 4:3 (pamätá sa pre každú reláciu),
   *Vyplniť obrazovku*, *Pôvodný pomer strán*; menu **Synchronizácia zvuku** – posun zvuku po 50 ms
   alebo predvoľby ±100 až ±1000 ms (tiež sa pamätá pre každú reláciu)
-- **Top Shelf** (horná lišta Apple TV pri ikone aplikácie): *Pokračovať v pozeraní* ako Netflix – kliknutím sa video
-  hneď spustí. Funguje cez App Group `group.local.tvarchiv.player`; ak ju podpisovací nástroj nepodporí,
-  zobrazí sa len obrázok bez textu.
+- **Top Shelf** (horná lišta Apple TV pri ikone aplikácie): Najnovšie videá z tv-archiv.sk a dlaždice Live / Relácie /
+  Hľadať / Nastavenia. *Pokračovať v pozeraní* by vyžadovalo App Group, ktorú bezplatný podpis cez Sideloadly nezachová.
 - **Filter** (detail relácie a Najnovšie): *Iba dostupné videá* – aplikácia overí, či sa stream naozaj dá prehrať,
   a nedostupné skryje (výsledok si pamätá 3 dni); *Zoradiť* od najnovšieho / od najstaršieho
 - detail relácie: epizódy ako štvorcové dlaždice, popis, skupiny (Archív, Bonusy, Videá…), zoznam epizód

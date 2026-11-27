@@ -50,7 +50,7 @@ struct SettingsView: View {
                 }
 
                 section("Top Shelf") {
-                    row("App Group", topShelfGroupOK ? tr("funguje") : tr("nefunguje (Sideloadly ju nezachoval)"))
+                    row("App Group", topShelfGroupOK ? tr("funguje") : tr("nepoužíva sa (bezplatný podpis ju nepodporuje)"))
                     row(tr("Posledný beh doplnku"), topShelfStatus)
                     Text(tr("Top Shelf sa zobrazí, keď je ikona aplikácie v hornom rade a prejdete na ňu. Po inštalácii môže trvať pár minút, kým ho tvOS prvýkrát načíta."))
                         .font(.caption).foregroundStyle(.secondary)
