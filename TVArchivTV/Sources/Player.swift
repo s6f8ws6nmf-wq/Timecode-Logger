@@ -7,9 +7,9 @@ enum PictureMode: String, CaseIterable {
 
     var title: String {
         switch self {
-        case .original: return "Pôvodný pomer strán"
-        case .stretch: return "Roztiahnuť na 16:9"
-        case .fill: return "Vyplniť obrazovku (orezať)"
+        case .original: return tr("Pôvodný pomer strán")
+        case .stretch: return tr("Roztiahnuť na 16:9")
+        case .fill: return tr("Vyplniť obrazovku (orezať)")
         }
     }
 
@@ -192,14 +192,14 @@ final class VideoPlayerController: AVPlayerViewController {
 
     private func audioSyncMenu() -> UIMenu {
         let ms = Int((audioOffset * 1000).rounded())
-        let current = ms == 0 ? "bez posunu" : (ms > 0 ? "zvuk neskôr o \(ms) ms" : "zvuk skôr o \(-ms) ms")
+        let current = ms == 0 ? tr("bez posunu") : (ms > 0 ? trf("zvuk neskôr o %d ms", ms) : trf("zvuk skôr o %d ms", -ms))
         let step: [UIMenuElement] = [
-            UIAction(title: "Posunúť zvuk neskôr (+50 ms)", subtitle: "keď zvuk predbieha obraz",
+            UIAction(title: tr("Posunúť zvuk neskôr (+50 ms)"), subtitle: tr("keď zvuk predbieha obraz"),
                      image: UIImage(systemName: "plus.circle")) { [weak self] _ in
                 guard let self else { return }
                 self.setAudioOffset(self.audioOffset + 0.05)
             },
-            UIAction(title: "Posunúť zvuk skôr (−50 ms)", subtitle: "keď zvuk mešká za obrazom",
+            UIAction(title: tr("Posunúť zvuk skôr (−50 ms)"), subtitle: tr("keď zvuk mešká za obrazom"),
                      image: UIImage(systemName: "minus.circle")) { [weak self] _ in
                 guard let self else { return }
                 self.setAudioOffset(self.audioOffset - 0.05)
@@ -207,12 +207,12 @@ final class VideoPlayerController: AVPlayerViewController {
         ]
         let presets: [UIMenuElement] = [-1.0, -0.5, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.5, 1.0].map { v in
             let vms = Int((v * 1000).rounded())
-            let title = vms == 0 ? "Bez posunu" : (vms > 0 ? "Zvuk neskôr o \(vms) ms" : "Zvuk skôr o \(-vms) ms")
+            let title = vms == 0 ? tr("Bez posunu") : (vms > 0 ? trf("Zvuk neskôr o %d ms", vms) : trf("Zvuk skôr o %d ms", -vms))
             return UIAction(title: title, state: vms == ms ? .on : .off) { [weak self] _ in self?.setAudioOffset(v) }
         }
-        return UIMenu(title: "Synchronizácia zvuku", subtitle: current, image: UIImage(systemName: "timer"), children: [
+        return UIMenu(title: tr("Synchronizácia zvuku"), subtitle: current, image: UIImage(systemName: "timer"), children: [
             UIMenu(title: "", options: .displayInline, children: step),
-            UIMenu(title: "Predvoľby", image: UIImage(systemName: "list.bullet"), children: presets)
+            UIMenu(title: tr("Predvoľby"), image: UIImage(systemName: "list.bullet"), children: presets)
         ])
     }
 
@@ -227,7 +227,7 @@ final class VideoPlayerController: AVPlayerViewController {
                 self.applyPictureMode()
             }
         }
-        return UIMenu(title: "Obraz", subtitle: pictureMode.title, image: UIImage(systemName: "aspectratio"),
+        return UIMenu(title: tr("Obraz"), subtitle: pictureMode.title, image: UIImage(systemName: "aspectratio"),
                       options: .singleSelection, children: actions)
     }
 

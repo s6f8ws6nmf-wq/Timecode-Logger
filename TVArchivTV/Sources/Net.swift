@@ -24,9 +24,9 @@ enum Net {
 
         var errorDescription: String? {
             switch self {
-            case .http(let code): return "Server vrátil chybu \(code)."
-            case .blocked: return "Stránka dočasne odmietla pripojenie. Skúste to o chvíľu znova."
-            case .badURL: return "Neplatná adresa."
+            case .http(let code): return trf("Server vrátil chybu %d.", code)
+            case .blocked: return tr("Stránka dočasne odmietla pripojenie. Skúste to o chvíľu znova.")
+            case .badURL: return tr("Neplatná adresa.")
             }
         }
     }

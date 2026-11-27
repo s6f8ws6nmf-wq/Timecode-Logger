@@ -25,6 +25,10 @@ struct WebcamGroup: Codable, Identifiable, Hashable {
     let cams: [Webcam]
     /// Skupina patrí do karty Live (napr. letiská), nie medzi Webkamery.
     var live: Bool? = nil
+    var title_en: String? = nil
+    var region_en: String? = nil
+
+    var displayTitle: String { AppLanguage.current == .en ? (title_en ?? title) : title }
 }
 
 struct WebcamCatalog: Codable {
@@ -33,6 +37,11 @@ struct WebcamCatalog: Codable {
 
     var webcamGroups: [WebcamGroup] { groups.filter { $0.live != true } }
     var liveGroups: [WebcamGroup] { groups.filter { $0.live == true } }
+
+    func regionTitle(_ r: String) -> String {
+        guard AppLanguage.current == .en else { return r }
+        return groups.first { $0.region == r }?.region_en ?? r
+    }
 
     var regions: [String] {
         var seen = Set<String>(); var out: [String] = []

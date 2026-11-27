@@ -31,10 +31,10 @@ enum Resolver {
 
         if targets.isEmpty {
             if let direct = findStream(in: segment) { return .stream(direct, headers: [:]) }
-            return .unavailable("Na stránke epizódy sa nenašlo video.")
+            return .unavailable(tr("Na stránke epizódy sa nenašlo video."))
         }
 
-        var lastReason = "Video sa nepodarilo načítať."
+        var lastReason = tr("Video sa nepodarilo načítať.")
         for t in targets {
             guard let url = Net.url(t) else { continue }
             switch await resolveTarget(url, depth: 0) {
@@ -77,7 +77,7 @@ enum Resolver {
         if let id = youTubeID(fromURL: s) { return .youtube(id) }
 
         if ["iprima.cz", "voyo.", "netflix.", "hbomax.", "max.com", "disneyplus.", "skyshowtime."].contains(where: { host.contains($0) }) {
-            return .unavailable("Tento zdroj (\(host)) vyžaduje predplatné alebo DRM a na Apple TV sa v tejto aplikácii prehrať nedá.")
+            return .unavailable(trf("Tento zdroj (%@) vyžaduje predplatné alebo DRM a na Apple TV sa v tejto aplikácii prehrať nedá.", host))
         }
 
         do {
@@ -107,9 +107,9 @@ enum Resolver {
         }
         if let any = findStream(in: html) { return .stream(any, headers: headers) }
         if html.lowercased().contains("not available") || html.contains("nie je dostupn") {
-            return .unavailable("Video TV JOJ nie je dostupné (licencia alebo krajina).")
+            return .unavailable(tr("Video TV JOJ nie je dostupné (licencia alebo krajina)."))
         }
-        return .unavailable("Video TV JOJ už nie je dostupné.")
+        return .unavailable(tr("Video TV JOJ už nie je dostupné."))
     }
 
     /// STVR (RTVS): /embed/archive/<relácia>/<id> → /json/archive5f.json?id=<id>
@@ -121,7 +121,7 @@ enum Resolver {
                 ?? HTML.first("archive5f\\.json\\?id=(\\d+)", in: html)
         }
         guard let id, let api = URL(string: "https://www.stvr.sk/json/archive5f.json?id=\(id)") else {
-            return .unavailable("Video STVR sa nenašlo.")
+            return .unavailable(tr("Video STVR sa nenašlo."))
         }
         let data = try await Net.data(api, referer: url.absoluteString)
         let obj = try JSONSerialization.jsonObject(with: data) as? [String: Any]
@@ -131,7 +131,7 @@ enum Resolver {
         if let src = hls?["src"] as? String, let u = URL(string: src) {
             return .stream(u, headers: ["Referer": "https://www.stvr.sk/"])
         }
-        return .unavailable("Video STVR nie je dostupné.")
+        return .unavailable(tr("Video STVR nie je dostupné."))
     }
 
     /// Česká televize: ID (idec) z adresy alebo stránky → API stream-data (HLS bez DRM).
@@ -142,37 +142,37 @@ enum Resolver {
             idec = HTML.first("\"idec\"\\s*:\\s*\"(\\d+)\"", in: html)
                 ?? HTML.first("[?&]IDEC=([0-9A-Za-z]+)", in: html)
         }
-        guard let idec else { return .unavailable("Video ČT sa nenašlo.") }
+        guard let idec else { return .unavailable(tr("Video ČT sa nenašlo.")) }
         let api = "https://api.ceskatelevize.cz/video/v1/playlist-vod/v1/stream-data/media/external/\(idec)?canPlayDrm=false&streamType=hls&quality=web&maxQualityCount=5"
-        guard let apiURL = URL(string: api) else { return .unavailable("Video ČT sa nenašlo.") }
+        guard let apiURL = URL(string: api) else { return .unavailable(tr("Video ČT sa nenašlo.")) }
         let data = try await Net.data(apiURL, referer: "https://www.ceskatelevize.cz/")
         let obj = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         if let streams = obj?["streams"] as? [[String: Any]],
            let s = streams.first?["url"] as? String, let u = URL(string: s) {
             return .stream(u, headers: [:])
         }
-        return .unavailable("Video ČT nie je dostupné (možno je obmedzené na Česko).")
+        return .unavailable(tr("Video ČT nie je dostupné (možno je obmedzené na Česko)."))
     }
 
     /// Markíza / Nova: prehrávač media.cms.<televízia>/embed/<id> obsahuje HLS v konfigurácii.
     static func cmsEmbed(_ url: URL) async throws -> Playback {
         let html = try await Net.text(url, referer: "https://\(url.host ?? "")/")
         if html.contains("not available in your country") {
-            return .unavailable("Video je dostupné len na Slovensku / v Česku (licencia).")
+            return .unavailable(tr("Video je dostupné len na Slovensku / v Česku (licencia)."))
         }
         let headers = ["Referer": "https://\(url.host ?? "")/"]
         if let u = findStream(in: html) { return .stream(u, headers: headers) }
         if html.lowercased().contains("drm") || html.contains("voyo") {
-            return .unavailable("Toto video je chránené (Voyo / DRM) a na Apple TV sa prehrať nedá.")
+            return .unavailable(tr("Toto video je chránené (Voyo / DRM) a na Apple TV sa prehrať nedá."))
         }
-        return .unavailable("Video sa v prehrávači nenašlo.")
+        return .unavailable(tr("Video sa v prehrávači nenašlo."))
     }
 
     /// Stránka televízie, ktorá vkladá prehrávač cez iframe.
     static func pageWithEmbed(_ url: URL, depth: Int) async throws -> Playback {
         let html = try await Net.text(url, referer: "https://www.tv-archiv.sk/")
         if html.contains("<title>Just a moment...</title>") {
-            return .unavailable("Stránka \(url.host ?? "") dočasne blokuje automatické načítanie (Cloudflare).")
+            return .unavailable(trf("Stránka %@ dočasne blokuje automatické načítanie (Cloudflare).", url.host ?? ""))
         }
         if let embed = HTML.first("(https?:)?//(media\\.cms\\.[a-z.]+/embed/[A-Za-z0-9_-]+[^\"'\\s<]*)", in: html, group: 2),
            let u = URL(string: "https://" + HTML.decodeEntities(embed)) {
@@ -199,7 +199,7 @@ enum Resolver {
                 return r
             }
         }
-        return .unavailable("Zdroj \(url.host ?? "") sa na Apple TV prehrať nedá.")
+        return .unavailable(trf("Zdroj %@ sa na Apple TV prehrať nedá.", url.host ?? ""))
     }
 
     // MARK: - Pomôcky

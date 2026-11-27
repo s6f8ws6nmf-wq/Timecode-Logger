@@ -82,8 +82,8 @@ struct VideoTile: View {
             }
             .buttonStyle(.card)
             .contextMenu {
-                Button("Prehrať od začiatku") { player.play(item, fromStart: true) }
-                if entry != nil { Button("Odstrániť z histórie", role: .destructive) { library.remove(item.path) } }
+                Button(tr("Prehrať od začiatku")) { player.play(item, fromStart: true) }
+                if entry != nil { Button(tr("Odstrániť z histórie"), role: .destructive) { library.remove(item.path) } }
             }
             .task(id: onlyAvailable) { if onlyAvailable { availability.check(item) } }
 
@@ -165,22 +165,22 @@ struct HomeView: View {
                     if !feed.hero.isEmpty { HeroCarousel(items: feed.hero) }
                     let unfinished = library.history.filter { !$0.finished }
                     if !unfinished.isEmpty {
-                        ShelfRow(title: "Pokračovať v pozeraní") {
+                        ShelfRow(title: tr("Pokračovať v pozeraní")) {
                             ForEach(unfinished.prefix(20)) { VideoTile(item: $0.item) }
                         }
                     }
                     if !library.favorites.isEmpty {
-                        ShelfRow(title: "Obľúbené relácie") {
+                        ShelfRow(title: tr("Obľúbené relácie")) {
                             ForEach(library.favorites) { ShowTile(show: $0) }
                         }
                     }
                     if !library.favoriteCams.isEmpty {
-                        ShelfRow(title: "Obľúbené webkamery") {
+                        ShelfRow(title: tr("Obľúbené webkamery")) {
                             ForEach(library.favoriteCams) { WebcamTile(cam: $0) }
                         }
                     }
                     if !latest.isEmpty {
-                        ShelfRow(title: "Najnovšie videá") {
+                        ShelfRow(title: tr("Najnovšie videá")) {
                             ForEach(latest.prefix(30)) { VideoTile(item: $0) }
                         }
                     }
@@ -231,12 +231,12 @@ struct HeroCarousel: View {
                 .clipped()
             LinearGradient(colors: [.clear, .black.opacity(0.35), .black.opacity(0.9)], startPoint: .top, endPoint: .bottom)
             VStack(alignment: .leading, spacing: 14) {
-                Text("NOVÁ EPIZÓDA").font(.caption.weight(.heavy)).foregroundStyle(Theme.accent)
+                Text(tr("NOVÁ EPIZÓDA")).font(.caption.weight(.heavy)).foregroundStyle(Theme.accent)
                 Text(item.video.showTitle).font(.system(size: 62, weight: .bold))
                     .lineLimit(1).minimumScaleFactor(0.6)
                 Text(item.video.title).font(.title3).foregroundStyle(.white.opacity(0.85)).lineLimit(2)
                 HStack(spacing: 16) {
-                    Label("Prehrať", systemImage: "play.fill")
+                    Label(tr("Prehrať"), systemImage: "play.fill")
                         .font(.headline)
                         .padding(.horizontal, 30).padding(.vertical, 14)
                         .glassCapsule()
@@ -266,9 +266,9 @@ struct LatestView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 30) {
                 HStack(alignment: .lastTextBaseline) {
-                    PageTitle(text: "Najnovšie")
+                    PageTitle(text: tr("Najnovšie"))
                     Spacer()
-                    Button { Task { await load() } } label: { Label("Obnoviť", systemImage: "arrow.clockwise") }
+                    Button { Task { await load() } } label: { Label(tr("Obnoviť"), systemImage: "arrow.clockwise") }
                         .glassButton()
                 }
                 switch state {
@@ -314,7 +314,7 @@ struct ChannelsView: View {
                                 VStack(alignment: .leading, spacing: 10) {
                                     Text(ch.name).font(.system(size: 40, weight: .bold))
                                         .lineLimit(1).minimumScaleFactor(0.6)
-                                    Text(ch.source.playable ? ch.source.name : "Len s predplatným")
+                                    Text(ch.source.playable ? ch.source.name : tr("Len s predplatným"))
                                         .font(.caption).foregroundStyle(.secondary)
                                 }
                                 .frame(width: 320, height: 130, alignment: .leading)
@@ -346,7 +346,7 @@ struct ShowListView: View {
                     case .loading: LoadingView()
                     case .failed(let msg): ErrorView(message: msg) { Task { await load() } }
                     case .loaded(let shows):
-                        if shows.isEmpty { Text("Nič sa nenašlo.").foregroundStyle(.secondary) } else { ShowGrid(shows: shows) }
+                        if shows.isEmpty { Text(tr("Nič sa nenašlo.")).foregroundStyle(.secondary) } else { ShowGrid(shows: shows) }
                     }
                 }
                 .padding(.horizontal, 80)
@@ -370,7 +370,7 @@ struct AZView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 30) {
-                PageTitle(text: "Relácie A – Z")
+                PageTitle(text: tr("Relácie A – Z"))
                 ScrollView(.horizontal, showsIndicators: false) {
                     GlassGroup(spacing: 12) {
                         HStack(spacing: 12) {
@@ -432,26 +432,26 @@ struct SearchView: View {
             VStack(alignment: .leading, spacing: 36) {
                 if searching { LoadingView() }
                 if !shows.isEmpty {
-                    Text("Relácie").font(.title3.weight(.bold))
+                    Text(tr("Relácie")).font(.title3.weight(.bold))
                     LazyVGrid(columns: columns, alignment: .leading, spacing: 40) {
                         ForEach(shows) { ShowTile(show: $0, size: Self.tile) }
                     }
                 }
                 if !videos.isEmpty {
-                    Text("Videá").font(.title3.weight(.bold))
+                    Text(tr("Videá")).font(.title3.weight(.bold))
                     LazyVGrid(columns: columns, alignment: .leading, spacing: 40) {
                         ForEach(videos) { VideoTile(item: $0, size: Self.tile) }
                     }
                 }
                 if !searching && shows.isEmpty && videos.isEmpty && query.count >= 2 {
-                    Text("Nič sa nenašlo.").foregroundStyle(.secondary)
+                    Text(tr("Nič sa nenašlo.")).foregroundStyle(.secondary)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 40)
             .padding(.bottom, 80)
         }
-        .searchable(text: $query, prompt: "Relácie, seriály, filmy")
+        .searchable(text: $query, prompt: tr("Relácie, seriály, filmy"))
         .task(id: query) {
             let q = query.trimmingCharacters(in: .whitespaces)
             guard q.count >= 2 else { shows = []; videos = []; return }
@@ -490,12 +490,12 @@ struct MineView: View {
                     .padding(.horizontal, 80)
                 }
                 if !unfinished.isEmpty {
-                    ShelfRow(title: "Pokračovať v pozeraní") {
+                    ShelfRow(title: tr("Pokračovať v pozeraní")) {
                         ForEach(unfinished.prefix(40)) { VideoTile(item: $0.item) }
                     }
                 }
                 if !library.favorites.isEmpty {
-                    ShelfRow(title: "Obľúbené relácie") {
+                    ShelfRow(title: tr("Obľúbené relácie")) {
                         ForEach(library.favorites) { ShowTile(show: $0) }
                     }
                 }
@@ -570,14 +570,14 @@ struct ShowDetailView: View {
                 HStack(spacing: 20) {
                     if let current, let first = resumeItem(in: current) {
                         Button { player.play(first) } label: {
-                            Label(library.entry(for: first.path) != nil ? "Pokračovať" : "Prehrať najnovšie",
+                            Label(library.entry(for: first.path) != nil ? tr("Pokračovať") : tr("Prehrať najnovšie"),
                                   systemImage: "play.fill").lineLimit(1)
                                 .padding(.horizontal, 20)
                         }
                         .glassButton(prominent: true)
                     }
                     Button { library.toggleFavorite(d.card) } label: {
-                        Label(library.isFavorite(d.card.path) ? "V obľúbených" : "Obľúbené",
+                        Label(library.isFavorite(d.card.path) ? tr("V obľúbených") : tr("Obľúbené"),
                               systemImage: library.isFavorite(d.card.path) ? "star.fill" : "star")
                     }
                     .glassButton()
@@ -610,11 +610,11 @@ struct ShowDetailView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 if items.isEmpty && onlyAvailable {
-                    Text(availability.checking.isEmpty ? "Žiadne dostupné videá v tejto skupine." : "Overujem dostupnosť…")
+                    Text(availability.checking.isEmpty ? tr("Žiadne dostupné videá v tejto skupine.") : tr("Overujem dostupnosť…"))
                         .foregroundStyle(.secondary)
                 }
             } else {
-                Text("Táto relácia zatiaľ nemá žiadne videá.").foregroundStyle(.secondary)
+                Text(tr("Táto relácia zatiaľ nemá žiadne videá.")).foregroundStyle(.secondary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -704,8 +704,8 @@ struct EpisodeTile: View {
         }
         .buttonStyle(.card)
         .contextMenu {
-            Button("Prehrať od začiatku") { player.play(item, fromStart: true) }
-            if entry != nil { Button("Odstrániť z histórie", role: .destructive) { library.remove(item.path) } }
+            Button(tr("Prehrať od začiatku")) { player.play(item, fromStart: true) }
+            if entry != nil { Button(tr("Odstrániť z histórie"), role: .destructive) { library.remove(item.path) } }
         }
         .task(id: onlyAvailable) { if onlyAvailable { availability.check(item) } }
     }
@@ -743,8 +743,8 @@ struct EpisodeRow: View {
         .glassButton()
         .frame(maxWidth: .infinity, alignment: .leading)
         .contextMenu {
-            Button("Prehrať od začiatku") { player.play(item, fromStart: true) }
-            if entry != nil { Button("Odstrániť z histórie", role: .destructive) { library.remove(item.path) } }
+            Button(tr("Prehrať od začiatku")) { player.play(item, fromStart: true) }
+            if entry != nil { Button(tr("Odstrániť z histórie"), role: .destructive) { library.remove(item.path) } }
         }
     }
 

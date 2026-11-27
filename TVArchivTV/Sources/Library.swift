@@ -71,6 +71,12 @@ final class Library: ObservableObject {
         refreshTopShelf()
     }
 
+    func clearHistory() {
+        history = []
+        save()
+        refreshTopShelf()
+    }
+
     func isFavorite(_ path: String) -> Bool { favorites.contains { $0.path == path } }
 
     func toggleFavorite(_ show: ShowCard) {
@@ -118,7 +124,7 @@ final class PlayerCenter: ObservableObject {
     func play(_ item: VideoItem, fromStart: Bool = false) {
         guard loadingPath == nil else { return }
         if !item.source.playable {
-            message = "\(item.source.name) vyžaduje predplatné alebo DRM a na Apple TV sa prehrať nedá."
+            message = trf("%@ vyžaduje predplatné alebo DRM a na Apple TV sa prehrať nedá.", item.source.name)
             return
         }
         loadingPath = item.path
@@ -146,7 +152,7 @@ final class PlayerCenter: ObservableObject {
             let r = await resolve()
             loadingPath = nil
             guard let r else {
-                message = "Živý prenos sa nepodarilo spustiť. Môže byť dostupný len v určitej krajine alebo je práve mimo vysielania."
+                message = tr("Živý prenos sa nepodarilo spustiť. Môže byť dostupný len v určitej krajine alebo je práve mimo vysielania.")
                 return
             }
             let item = VideoItem(path: "live:" + id, title: r.now.map { "\(title) – \($0)" } ?? title,
@@ -167,7 +173,7 @@ final class PlayerCenter: ObservableObject {
         let candidates = ["youtube://www.youtube.com/watch?v=\(id)", "youtube://watch/\(id)"]
         func attempt(_ i: Int) {
             guard i < candidates.count, let u = URL(string: candidates[i]) else {
-                message = "Toto video je na YouTube. Nainštalujte si aplikáciu YouTube na Apple TV (ID videa: \(id))."
+                message = trf("Toto video je na YouTube. Nainštalujte si aplikáciu YouTube na Apple TV (ID videa: %@).", id)
                 return
             }
             UIApplication.shared.open(u, options: [:]) { ok in

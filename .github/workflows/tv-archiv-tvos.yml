@@ -48,6 +48,10 @@ jobs:
           APP=$(find build/Build/Products/Release-appletvos -maxdepth 1 -name '*.app' | head -1)
           echo "App: $APP"
           rm -rf Payload && mkdir Payload && cp -R "$APP" Payload/
+          # údaje o zostave pre Nastavenia
+          PL="Payload/$(basename "$APP")/Info.plist"
+          /usr/libexec/PlistBuddy -c "Add :TVABuildDate string $(TZ=Europe/Bratislava date '+%d.%m.%Y %H:%M')" "$PL"
+          /usr/libexec/PlistBuddy -c "Add :TVACommit string ${GITHUB_SHA::7}" "$PL"
           # ad-hoc podpis s entitlements (App Group pre Top Shelf) – Sideloadly ich prevezme pri prepodpise
           APPN=$(basename "$APP")
           for EXT in "Payload/$APPN"/PlugIns/*.appex; do

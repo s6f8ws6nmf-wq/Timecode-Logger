@@ -10,56 +10,58 @@ struct LiveView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 34) {
-                PageTitle(text: "Živé vysielanie").padding(.horizontal, 80)
-                content
+                PageTitle(text: tr("Živé vysielanie")).padding(.horizontal, 80)
+                channels
+                if let catalog {
+                    // americké televízie, letiská… (skupiny s "live": true)
+                    ForEach(catalog.liveGroups) { g in
+                        ShelfRow(title: g.displayTitle) {
+                            ForEach(g.cams) { WebcamTile(cam: $0) }
+                        }
+                    }
+                    WebcamsSection(catalog: catalog)
+                } else {
+                    LoadingView()
+                }
             }
             .padding(.bottom, 80)
         }
         .task { if catalog == nil { catalog = await WebcamStore.load() } }
     }
 
-    @ViewBuilder private var content: some View {
+    private var channels: some View {
         VStack(alignment: .leading, spacing: 34) {
-                ForEach(groups, id: \.self) { group in
-                    Text(group).font(.title3.weight(.bold))
-                    GlassGroup(spacing: 40) {
-                        LazyVGrid(columns: columns, alignment: .leading, spacing: 40) {
-                            ForEach(LiveChannel.all.filter { $0.group == group }) { ch in
-                                Button {
-                                    player.playLive(id: ch.id, title: ch.name, subtitle: ch.group) { await ch.resolve() }
-                                } label: {
-                                    HStack(spacing: 18) {
-                                        Image(systemName: "dot.radiowaves.left.and.right")
-                                            .font(.title2)
-                                            .foregroundStyle(.red)
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(ch.name).font(.system(size: 34, weight: .bold))
-                                                .lineLimit(1).minimumScaleFactor(0.6)
-                                            Text("NAŽIVO").font(.caption2.weight(.heavy)).foregroundStyle(.red)
-                                        }
-                                        Spacer(minLength: 0)
-                                        if player.loadingPath == "live:" + ch.id { ProgressView() }
+            ForEach(groups, id: \.self) { group in
+                Text(group).font(.title3.weight(.bold))
+                GlassGroup(spacing: 40) {
+                    LazyVGrid(columns: columns, alignment: .leading, spacing: 40) {
+                        ForEach(LiveChannel.all.filter { $0.group == group }) { ch in
+                            Button {
+                                player.playLive(id: ch.id, title: ch.name, subtitle: ch.group) { await ch.resolve() }
+                            } label: {
+                                HStack(spacing: 18) {
+                                    Image(systemName: "dot.radiowaves.left.and.right")
+                                        .font(.title2)
+                                        .foregroundStyle(.red)
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(ch.name).font(.system(size: 34, weight: .bold))
+                                            .lineLimit(1).minimumScaleFactor(0.6)
+                                        Text(tr("NAŽIVO")).font(.caption2.weight(.heavy)).foregroundStyle(.red)
                                     }
-                                    .frame(width: 320, height: 110, alignment: .leading)
+                                    Spacer(minLength: 0)
+                                    if player.loadingPath == "live:" + ch.id { ProgressView() }
                                 }
-                                .glassButton()
+                                .frame(width: 320, height: 110, alignment: .leading)
                             }
+                            .glassButton()
                         }
                     }
                 }
-                Text("Česká televize vysiela väčšinu programov len pre Česko; ČT24 býva dostupná aj na Slovensku.")
-                    .font(.caption).foregroundStyle(.secondary)
+            }
+            Text(tr("Česká televize vysiela väčšinu programov len pre Česko; ČT24 býva dostupná aj na Slovensku."))
+                .font(.caption).foregroundStyle(.secondary)
         }
         .padding(.horizontal, 80)
-
-        // letiská a ďalšie živé zábery (zo zoznamu webcams.json, skupiny s "live": true)
-        if let catalog {
-            ForEach(catalog.liveGroups) { g in
-                ShelfRow(title: g.title) {
-                    ForEach(g.cams) { WebcamTile(cam: $0) }
-                }
-            }
-        }
     }
 
     private var groups: [String] {
@@ -117,7 +119,7 @@ struct WebcamTile: View {
             }
             .buttonStyle(.card)
             .contextMenu {
-                Button(library.isFavoriteCam(cam) ? "Odobrať z obľúbených" : "Pridať do obľúbených") {
+                Button(library.isFavoriteCam(cam) ? tr("Odobrať z obľúbených") : tr("Pridať do obľúbených")) {
                     library.toggleFavoriteCam(cam)
                 }
             }
@@ -131,60 +133,55 @@ struct WebcamTile: View {
     }
 }
 
-struct WebcamsView: View {
+struct WebcamsSection: View {
     @EnvironmentObject private var library: Library
-    @State private var catalog: WebcamCatalog?
-    @State private var region = "Všetko"
+    let catalog: WebcamCatalog
+    @State private var region = "*"
     @State private var query = ""
 
     var body: some View {
-        ScrollView(.vertical) {
-            VStack(alignment: .leading, spacing: 24) {
-                HStack(alignment: .lastTextBaseline, spacing: 30) {
-                    PageTitle(text: "Webkamery")
-                    Spacer()
-                    TextField("Hľadať kameru", text: $query)
-                        .frame(width: 520)
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(alignment: .lastTextBaseline, spacing: 30) {
+                Text(tr("Webkamery")).font(.system(size: 52, weight: .bold))
+                Spacer()
+                TextField(tr("Hľadať kameru"), text: $query)
+                    .frame(width: 520)
+            }
+            .padding(.horizontal, 80)
+            .padding(.top, 30)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                GlassGroup(spacing: 14) {
+                    HStack(spacing: 14) {
+                        chip("*", tr("Všetko"))
+                        chip("fav", tr("Obľúbené"))
+                        ForEach(catalog.regions, id: \.self) { r in chip(r, catalog.regionTitle(r)) }
+                    }
                 }
                 .padding(.horizontal, 80)
+                .padding(.vertical, 24)
+            }
+            .scrollClipDisabled()
 
-                if let catalog {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        GlassGroup(spacing: 14) {
-                            HStack(spacing: 14) {
-                                ForEach(["Všetko", "Obľúbené"] + catalog.regions, id: \.self) { r in
-                                    Button { region = r } label: {
-                                        Text(r).lineLimit(1).fixedSize()
-                                    }
-                                    .glassButton(prominent: r == region)
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 80)
-                        .padding(.vertical, 24)
-                    }
-                    .scrollClipDisabled()
-
-                    let rows = visibleRows(catalog)
-                    if rows.isEmpty {
-                        Text(region == "Obľúbené"
-                             ? "Zatiaľ nemáte obľúbené kamery. Podržte stredné tlačidlo na kamere a zvoľte Pridať do obľúbených."
-                             : "Žiadna kamera nezodpovedá hľadaniu.")
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, 80)
-                    }
-                    ForEach(rows) { row in
-                        ShelfRow(title: row.title) {
-                            ForEach(row.cams) { WebcamTile(cam: $0) }
-                        }
-                    }
-                } else {
-                    LoadingView()
+            let rows = visibleRows()
+            if rows.isEmpty {
+                Text(region == "fav"
+                     ? tr("Zatiaľ nemáte obľúbené kamery. Podržte stredné tlačidlo na kamere a zvoľte Pridať do obľúbených.")
+                     : tr("Žiadna kamera nezodpovedá hľadaniu."))
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 80)
+            }
+            ForEach(rows) { row in
+                ShelfRow(title: row.title) {
+                    ForEach(row.cams) { WebcamTile(cam: $0) }
                 }
             }
-            .padding(.bottom, 80)
         }
-        .task { if catalog == nil { catalog = await WebcamStore.load() } }
+    }
+
+    private func chip(_ id: String, _ title: String) -> some View {
+        Button { region = id } label: { Text(title).lineLimit(1).fixedSize() }
+            .glassButton(prominent: id == region)
     }
 
     struct Row: Identifiable {
@@ -193,19 +190,19 @@ struct WebcamsView: View {
         var id: String { title }
     }
 
-    private func visibleRows(_ c: WebcamCatalog) -> [Row] {
+    private func visibleRows() -> [Row] {
         let q = query.trimmingCharacters(in: .whitespaces)
             .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
         func match(_ cam: Webcam) -> Bool { q.isEmpty || cam.searchText.contains(q) }
         var rows: [Row] = []
-        if region == "Všetko" || region == "Obľúbené" {
+        if region == "*" || region == "fav" {
             let fav = library.favoriteCams.filter(match)
-            if !fav.isEmpty { rows.append(Row(title: "Obľúbené kamery", cams: fav)) }
-            if region == "Obľúbené" { return rows }
+            if !fav.isEmpty { rows.append(Row(title: tr("Obľúbené kamery"), cams: fav)) }
+            if region == "fav" { return rows }
         }
-        for g in c.webcamGroups where region == "Všetko" || g.region == region {
+        for g in catalog.webcamGroups where region == "*" || g.region == region {
             let cams = g.cams.filter(match)
-            if !cams.isEmpty { rows.append(Row(title: g.title, cams: cams)) }
+            if !cams.isEmpty { rows.append(Row(title: g.displayTitle, cams: cams)) }
         }
         return rows
     }

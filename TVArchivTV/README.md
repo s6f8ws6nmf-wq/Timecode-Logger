@@ -10,14 +10,18 @@ Vzhľad je ako aplikácia Apple TV: tmavé rozhranie, veľký pás najnovších 
 a pozadie, ktoré sa mení podľa vybranej položky. Na tvOS 26 používa **Liquid Glass** (sklenené tlačidlá,
 panely a lištu kariet), na starších systémoch matný materiál.
 
+Menu: **Domov · Relácie · Live · Hľadať · Nastavenia**. Aplikácia je po slovensky (predvolene) aj po anglicky.
+
 - **Domov** – najnovšie epizódy, Pokračovať v pozeraní, Obľúbené relácie a webkamery, Najnovšie videá,
   Dnes najpozeranejšie seriály, Celé filmy
-- **A – Z** – všetky relácie podľa písmen
-- **Live** – živé vysielanie: STVR (Jednotka, Dvojka, :24, Šport, NR SR), TV Lux, ČT (ČT1, ČT2, ČT24, ČT sport, ČT :D, ČT art); Letiská (Praha, Heathrow, LAX, Maho Beach…)
+- **Relácie** – všetky relácie podľa písmen A – Z
+- **Live** – živé vysielanie, americké televízie (CNN, ABC, NBC, Bloomberg, NASA…), letiská a webkamery: STVR (Jednotka, Dvojka, :24, Šport, NR SR), TV Lux, ČT (ČT1, ČT2, ČT24, ČT sport, ČT :D, ČT art); Letiská (Praha, Heathrow, LAX, Maho Beach…)
 - **Webkamery** – Slovensko (Tatry priamo z vt.sk, hory, mestá), Česko, Európa, USA, Ázia, príroda;
   výber okruhu, hľadanie, obľúbené (podržať stredné tlačidlo). Kamery z YouTube sa otvoria v aplikácii YouTube.
   Zoznam je v `Resources/webcams.json` a aplikácia si ho načíta aj z GitHubu – dá sa aktualizovať bez novej inštalácie.
 - **Hľadať** – rovnaké vyhľadávanie ako na stránke
+- **Nastavenia** – zobrazovať všetok / iba dostupný obsah, jazyk (slovenčina / English), verzia a dátum zostavy,
+  platnosť inštalácie (deň pred vypršaním upozorní na novú inštaláciu cez Sideloadly), tvorca: CREATIVISION s. r. o.
 - prehrávač: menu **Obraz** v lište – *Roztiahnuť na 16:9* pre videá stlačené na 4:3 (pamätá sa pre každú reláciu),
   *Vyplniť obrazovku*, *Pôvodný pomer strán*; menu **Synchronizácia zvuku** – posun zvuku po 50 ms
   alebo predvoľby ±100 až ±1000 ms (tiež sa pamätá pre každú reláciu)

@@ -201,7 +201,7 @@ struct ErrorView: View {
         VStack(spacing: 28) {
             Image(systemName: "wifi.exclamationmark").font(.system(size: 64)).foregroundStyle(.secondary)
             Text(message).multilineTextAlignment(.center).foregroundStyle(.secondary)
-            Button("Skúsiť znova", action: retry).glassButton()
+            Button(tr("Skúsiť znova"), action: retry).glassButton()
         }
         .padding(60)
         .glassPanel()

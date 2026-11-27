@@ -54,6 +54,12 @@ final class Availability: ObservableObject {
         }
     }
 
+    func clear() {
+        status = [:]
+        stamps = [:]
+        UserDefaults.standard.removeObject(forKey: key)
+    }
+
     private func save() {
         var out: [String: [Double]] = [:]
         for (p, ok) in status { out[p] = [ok ? 1 : 0, stamps[p] ?? Date().timeIntervalSince1970] }
@@ -88,7 +94,7 @@ enum EpisodeOrder {
     }
 }
 
-/// Spoločné nastavenia filtra (pamätajú sa).
+/// Zoradenie zoznamu (Iba dostupný obsah sa nastavuje v Nastaveniach).
 struct FilterMenu: View {
     @AppStorage("filter.onlyAvailable") private var onlyAvailable = false
     @AppStorage("filter.oldestFirst") private var oldestFirst = false
@@ -98,27 +104,25 @@ struct FilterMenu: View {
     var body: some View {
         HStack(spacing: 20) {
             Menu {
-                Toggle("Iba dostupné videá", isOn: $onlyAvailable)
-                Picker("Zoradiť", selection: $oldestFirst) {
-                    Label("Od najnovšieho", systemImage: "arrow.down").tag(false)
-                    Label("Od najstaršieho", systemImage: "arrow.up").tag(true)
+                Picker(tr("Zoradiť"), selection: $oldestFirst) {
+                    Label(tr("Od najnovšieho"), systemImage: "arrow.down").tag(false)
+                    Label(tr("Od najstaršieho"), systemImage: "arrow.up").tag(true)
                 }
             } label: {
-                Label("Filter", systemImage: onlyAvailable || oldestFirst
-                      ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                Label(tr("Zoradiť"), systemImage: "arrow.up.arrow.down")
                     .lineLimit(1)
                     .fixedSize()
             }
             .menuStyle(.button)
-            .glassButton(prominent: onlyAvailable || oldestFirst)
+            .glassButton(prominent: oldestFirst)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(oldestFirst ? "Od najstaršieho" : "Od najnovšieho")
+                Text(oldestFirst ? tr("Od najstaršieho") : tr("Od najnovšieho"))
                 if onlyAvailable {
                     if let shown, let total {
-                        Text("Iba dostupné · \(shown) z \(total)")
+                        Text(trf("Iba dostupné · %d z %d", shown, total))
                     } else {
-                        Text("Iba dostupné")
+                        Text(tr("Iba dostupné"))
                     }
                 }
             }

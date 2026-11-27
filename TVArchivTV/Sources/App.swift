@@ -34,27 +34,31 @@ enum Route: Hashable {
 struct RootView: View {
     @EnvironmentObject private var player: PlayerCenter
     @EnvironmentObject private var library: Library
+    @AppStorage(AppLanguage.storageKey) private var lang = AppLanguage.sk.rawValue
+    @State private var installWarning: String?
 
     var body: some View {
         ZStack {
             BackdropView()
             TabView {
                 Stack { HomeView() }
-                    .tabItem { Label("Domov", systemImage: "house.fill") }
+                    .tabItem { Label(tr("Domov"), systemImage: "house.fill") }
                 Stack { AZView() }
-                    .tabItem { Label("A – Z", systemImage: "textformat") }
+                    .tabItem { Label(tr("Relácie"), systemImage: "textformat") }
                 Stack { LiveView() }
-                    .tabItem { Label("Live", systemImage: "dot.radiowaves.left.and.right") }
-                Stack { WebcamsView() }
-                    .tabItem { Label("Webkamery", systemImage: "web.camera") }
+                    .tabItem { Label(tr("Live"), systemImage: "dot.radiowaves.left.and.right") }
                 Stack { SearchView() }
-                    .tabItem { Label("Hľadať", systemImage: "magnifyingglass") }
+                    .tabItem { Label(tr("Hľadať"), systemImage: "magnifyingglass") }
+                Stack { SettingsView() }
+                    .tabItem { Label(tr("Nastavenia"), systemImage: "gearshape.fill") }
             }
+            // zmena jazyka prekreslí celé rozhranie
+            .id(lang)
 
             if player.loadingPath != nil {
                 HStack(spacing: 24) {
                     ProgressView()
-                    Text("Pripravujem video…").font(.headline)
+                    Text(tr("Pripravujem video…")).font(.headline)
                 }
                 .padding(.horizontal, 48).padding(.vertical, 32)
                 .glassPanel(cornerRadius: 40)
@@ -65,8 +69,17 @@ struct RootView: View {
             // krátka pauza, aby bolo okno pripravené aj pri studenom štarte z Top Shelf
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { player.play(item) }
         }
-        .onAppear { library.refreshTopShelf() }
-        .alert("Video", isPresented: Binding(get: { player.message != nil },
+        .onAppear {
+            library.refreshTopShelf()
+            installWarning = InstallInfo.warningIfNeeded()
+        }
+        .alert(tr("Upozornenie"), isPresented: Binding(get: { installWarning != nil },
+                                                      set: { if !$0 { installWarning = nil } })) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(installWarning ?? "")
+        }
+        .alert(tr("Video"), isPresented: Binding(get: { player.message != nil },
                                              set: { if !$0 { player.message = nil } })) {
             Button("OK", role: .cancel) {}
         } message: {

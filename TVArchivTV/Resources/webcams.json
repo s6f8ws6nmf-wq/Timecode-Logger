@@ -1,7 +1,72 @@
 {
- "version": 2,
+ "version": 3,
  "updated": "2026-11-27",
  "groups": [
+  {
+   "id": "us-tv",
+   "title": "Americké televízie",
+   "title_en": "US TV Channels",
+   "region": "USA TV",
+   "region_en": "US TV",
+   "live": true,
+   "cams": [
+    {
+     "name": "CNN Headlines",
+     "place": "CNN · 24/7",
+     "youtube": "GotlA1KKWoo"
+    },
+    {
+     "name": "ABC News Live",
+     "place": "ABC News · 24/7",
+     "youtube": "KQhNZQ_Uag8"
+    },
+    {
+     "name": "NBC News NOW",
+     "place": "NBC News",
+     "youtube": "k_ygu0jVZ3o"
+    },
+    {
+     "name": "Bloomberg Business News",
+     "place": "Bloomberg TV",
+     "youtube": "QB5BNdBFujE"
+    },
+    {
+     "name": "Yahoo Finance",
+     "place": "24/7",
+     "youtube": "KQp-e_XQnDE"
+    },
+    {
+     "name": "FOX Weather",
+     "place": "24/7",
+     "youtube": "wt6SIE7BXS8"
+    },
+    {
+     "name": "WeatherNation",
+     "place": "24/7",
+     "youtube": "3dDyjHc8DkA"
+    },
+    {
+     "name": "CBN News",
+     "place": "24/7",
+     "youtube": "OviZBygJBOQ"
+    },
+    {
+     "name": "Tampa Bay 28",
+     "place": "24/7",
+     "youtube": "MJKuobL_VjM"
+    },
+    {
+     "name": "NASA – ISS v HD",
+     "place": "Medzinárodná vesmírna stanica",
+     "youtube": "ROboUHfPUrU"
+    },
+    {
+     "name": "NASA – ISS živé video",
+     "place": "Medzinárodná vesmírna stanica",
+     "youtube": "M3HKLzjvKPc"
+    }
+   ]
+  },
   {
    "id": "sk-tatry",
    "title": "Vysoké Tatry – priamy prenos",
@@ -52,7 +117,9 @@
      "place": "Vysoké Tatry",
      "hls": "https://stream2.profi-net.sk:443/tmr//STREAM33.stream/playlist.m3u8"
     }
-   ]
+   ],
+   "title_en": "High Tatras – direct stream",
+   "region_en": "Slovakia"
   },
   {
    "id": "sk-hory",
@@ -89,7 +156,9 @@
      "place": "Fara Švošov",
      "youtube": "aZlEdtngres"
     }
-   ]
+   ],
+   "title_en": "Slovakia – mountains & resorts",
+   "region_en": "Slovakia"
   },
   {
    "id": "sk-mesta",
@@ -141,7 +210,9 @@
      "place": "TV Kežmarok",
      "youtube": "dKId6oX2c98"
     }
-   ]
+   ],
+   "title_en": "Slovakia – cities",
+   "region_en": "Slovakia"
   },
   {
    "id": "cz",
@@ -168,7 +239,9 @@
      "place": "Mesto Cheb",
      "youtube": "n2VD7ePyYM0"
     }
-   ]
+   ],
+   "title_en": "Czechia",
+   "region_en": "Czechia"
   },
   {
    "id": "eu",
@@ -250,7 +323,9 @@
      "place": "Cam Nomad",
      "youtube": "zmv6NPLg91U"
     }
-   ]
+   ],
+   "title_en": "Europe",
+   "region_en": "Europe"
   },
   {
    "id": "usa",
@@ -317,7 +392,9 @@
      "place": "Karibik",
      "youtube": "YeEMPcYCbgQ"
     }
-   ]
+   ],
+   "title_en": "USA",
+   "region_en": "USA"
   },
   {
    "id": "asia",
@@ -349,7 +426,9 @@
      "place": "Japan Walk",
      "youtube": "L6wO1-U2RTY"
     }
-   ]
+   ],
+   "title_en": "Asia",
+   "region_en": "Asia"
   },
   {
    "id": "nature",
@@ -401,7 +480,9 @@
      "place": "Michigan",
      "youtube": "TPGY7UYzbKw"
     }
-   ]
+   ],
+   "title_en": "Nature & animals",
+   "region_en": "Nature"
   },
   {
    "id": "airports",
@@ -474,7 +555,9 @@
      "place": "Karibik",
      "youtube": "XLDtjtfqIYw"
     }
-   ]
+   ],
+   "title_en": "Airports",
+   "region_en": "Airports"
   }
  ]
 }
