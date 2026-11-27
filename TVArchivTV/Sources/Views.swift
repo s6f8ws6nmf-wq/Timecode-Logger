@@ -159,6 +159,7 @@ struct PageTitle: View {
 
 struct HomeView: View {
     @EnvironmentObject private var library: Library
+    @EnvironmentObject private var availability: Availability
     @State private var state: LoadState<HomeFeed> = .loading
     @State private var latest: [VideoItem] = []
 
@@ -176,9 +177,10 @@ struct HomeView: View {
                             ForEach(unfinished.prefix(20)) { VideoTile(item: $0.item) }
                         }
                     }
-                    if !library.favorites.isEmpty {
+                    let favs = library.favorites.filter { !availability.isEmptyShow($0) }
+                    if !favs.isEmpty {
                         ShelfRow(title: tr("Obľúbené relácie")) {
-                            ForEach(library.favorites) { ShowTile(show: $0) }
+                            ForEach(favs) { ShowTile(show: $0) }
                         }
                     }
                     if !library.favoriteCams.isEmpty {
@@ -191,9 +193,13 @@ struct HomeView: View {
                             ForEach(latest.prefix(30)) { VideoTile(item: $0) }
                         }
                     }
+                    // prázdne relácie (bez videí) na Domove nezobrazujeme
                     ForEach(feed.shelves) { shelf in
-                        ShelfRow(title: shelf.id) {
-                            ForEach(shelf.items) { ShowTile(show: $0) }
+                        let items = shelf.items.filter { !availability.isEmptyShow($0) }
+                        if !items.isEmpty {
+                            ShelfRow(title: shelf.id) {
+                                ForEach(items) { ShowTile(show: $0) }
+                            }
                         }
                     }
                 }
