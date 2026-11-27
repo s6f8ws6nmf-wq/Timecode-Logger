@@ -56,6 +56,11 @@ jobs:
           codesign -f -s - --entitlements Sources/TVArchiv.entitlements "Payload/$APPN"
           codesign -d --entitlements - "Payload/$APPN" || true
           ls "Payload/$APPN/PlugIns" || true
+          # kontrola: doplnok musí mať CFBundlePackageType = XPC!
+          for EXT in "Payload/$APPN"/PlugIns/*.appex; do
+            T=$(/usr/libexec/PlistBuddy -c "Print :CFBundlePackageType" "$EXT/Info.plist")
+            echo "$EXT: $T"; [ "$T" = "XPC!" ] || { echo "Chýba XPC! v Info.plist doplnku"; exit 1; }
+          done
           rm -f TV-Archiv-tvOS.ipa
           zip -qry TV-Archiv-tvOS.ipa Payload
           ls -la TV-Archiv-tvOS.ipa

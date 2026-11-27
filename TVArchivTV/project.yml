@@ -66,6 +66,12 @@ targets:
       path: TopShelf/Info.plist
       properties:
         CFBundleDisplayName: "TV Archív Top Shelf"
+        CFBundlePackageType: "XPC!"
+        CFBundleName: TopShelf
+        CFBundleExecutable: "$(EXECUTABLE_NAME)"
+        CFBundleIdentifier: "$(PRODUCT_BUNDLE_IDENTIFIER)"
+        CFBundleInfoDictionaryVersion: "6.0"
+        CFBundleDevelopmentRegion: sk
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         NSExtension:
